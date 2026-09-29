@@ -71,12 +71,24 @@ class MlFeatureExtractor {
         hasExcessiveSubdomainsUrl ||
         hasShortenerUrl;
 
+    final hasDeliveryContext = _containsAny(text, [
+      'delivery',
+      'delivery service',
+      'delivery company',
+      'package',
+      'parcel',
+      'shipment',
+      'courier',
+      'shipping',
+    ]);
+
     final hasAccountVerification = _containsAny(text, [
       'verify your account',
       'verify account',
       'account verification',
       'confirm your account',
       'confirm account',
+      'confirm your account details',
       'security verification',
     ]);
 
@@ -175,7 +187,7 @@ class MlFeatureExtractor {
     final hasPrizeFinancialCombination = hasPrizeReward && hasFinancial;
 
     final hasAccountCredentialCombination =
-        hasAccountSecurity && hasCredentialRequest;
+        (hasAccountSecurity || hasAccountVerification) && hasCredentialRequest;
 
     final hasAuthorityCredentialCombination =
         hasAuthority && hasCredentialRequest;
@@ -195,6 +207,7 @@ class MlFeatureExtractor {
       hasSecrecy: hasSecrecy,
       hasAuthority: hasAuthority,
       hasPromotion: hasPromotion,
+      hasDeliveryContext: hasDeliveryContext,
       hasUrl: hasUrl,
       hasSuspiciousUrl: hasSuspiciousUrl,
       hasIpUrl: hasIpUrl,

@@ -11,7 +11,7 @@ void main() {
       final example = dataset.build().first;
       final encoded = encoder.encode(example.features);
 
-      expect(encoded.length, 27);
+      expect(encoded.length, 28);
 
       for (final value in encoded) {
         expect(value, isA<double>());

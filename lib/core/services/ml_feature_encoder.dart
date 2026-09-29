@@ -17,6 +17,7 @@ class MlFeatureEncoder {
       _bool(features.hasSecrecy),
       _bool(features.hasAuthority),
       _bool(features.hasPromotion),
+      _bool(features.hasDeliveryContext),
 
       _bool(features.hasUrl),
       _bool(features.hasSuspiciousUrl),

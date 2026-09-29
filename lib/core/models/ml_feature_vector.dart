@@ -17,6 +17,7 @@ class MlFeatureVector {
   final bool hasSecrecy;
   final bool hasAuthority;
   final bool hasPromotion;
+  final bool hasDeliveryContext;
 
   // URL features.
   final bool hasUrl;
@@ -53,6 +54,7 @@ class MlFeatureVector {
     required this.hasSecrecy,
     required this.hasAuthority,
     required this.hasPromotion,
+    required this.hasDeliveryContext,
     required this.hasUrl,
     required this.hasSuspiciousUrl,
     required this.hasIpUrl,

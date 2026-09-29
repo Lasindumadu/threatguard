@@ -46,6 +46,7 @@ void main() {
       'hasSecrecy',
       'hasAuthority',
       'hasPromotion',
+      'hasDeliveryContext',
       'hasUrl',
       'hasSuspiciousUrl',
       'hasIpUrl',
@@ -169,6 +170,8 @@ bool _getBooleanFeature(MlFeatureVector features, String featureName) {
       return features.hasAuthority;
     case 'hasPromotion':
       return features.hasPromotion;
+    case 'hasDeliveryContext':
+      return features.hasDeliveryContext;
     case 'hasUrl':
       return features.hasUrl;
     case 'hasSuspiciousUrl':
