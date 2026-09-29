@@ -511,6 +511,7 @@ class ThreatAnalyzer {
       'share your password',
       'submit your password',
       'confirm your password',
+      'verify your password',
       'need your password',
       'needs your password',
       'require your password',

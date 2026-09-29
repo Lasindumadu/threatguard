@@ -1,0 +1,1 @@
+enum MessageSource { manual, sms }
