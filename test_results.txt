@@ -1,82 +1,5 @@
 00:00 +0: loading C:/Users/Admin/Desktop/APss/cyber/threatguard/test/hybrid_threat_analysis_test.dart
-00:00 +0: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/hybrid_threat_analysis_test.dart: stores rule analysis and ML prediction together
-00:04 +1: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/logistic_regression_classifier_test.dart: trains logistic regression classifier
-00:04 +2: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/logistic_regression_error_analysis_test.dart: prints held-out classification errors
-
-===== ML ERROR ANALYSIS =====
-
-Case: phishing_001
-Expected: phishing
-Predicted: socialEngineering
-Confidence: 0.9089
-Feature vector: [147.0, 20.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0]
-
-Total errors: 1
-============================
-
-00:11 +3: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/logistic_regression_evaluation_test.dart: evaluates logistic regression on held-out test cases
-00:11 +4: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/logistic_regression_evaluation_test.dart: evaluates logistic regression on held-out test cases
-00:11 +4: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/majority_class_classifier_test.dart: measures majority-class baseline accuracy
-
-===== MAJORITY CLASS BASELINE =====
-Total examples: 105
-Correct predictions: 24
-Accuracy: 22.9%
-===================================
-
-00:11 +5: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/logistic_regression_evaluation_test.dart: evaluates logistic regression on held-out test cases
-
-===== LOGISTIC REGRESSION EVALUATION =====
-Training examples: 70
-Test examples: 35
-Correct predictions: 34
-Accuracy: 97.1%
-
-Confusion matrix:
-Actual ΓåÆ Predicted
-
-legitimate: legitimate=8, spam=0, phishing=0, scam=0, socialEngineering=0
-spam: legitimate=0, spam=6, phishing=0, scam=0, socialEngineering=0
-phishing: legitimate=0, spam=0, phishing=6, scam=0, socialEngineering=1
-scam: legitimate=0, spam=0, phishing=0, scam=7, socialEngineering=0
-socialEngineering: legitimate=0, spam=0, phishing=0, scam=0, socialEngineering=7
-===========================================
-
-00:11 +6: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_cross_validation_error_analysis_test.dart: analyzes errors across deterministic 5-fold cross-validation
-00:12 +6: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/hybrid_threat_evaluation_test.dart: evaluates rule-only, ML-only, and hybrid on held-out cases
-
-===== HYBRID THREAT EVALUATION =====
-Training examples: 70
-Held-out test examples: 35
-
-Rule-only: 35/35 (100.0%)
-ML-only:   34/35 (97.1%)
-Hybrid:    35/35 (100.0%)
-
-Rule-only confusion matrix:
-legitimate: legitimate=8, spam=0, phishing=0, scam=0, socialEngineering=0
-spam: legitimate=0, spam=6, phishing=0, scam=0, socialEngineering=0
-phishing: legitimate=0, spam=0, phishing=7, scam=0, socialEngineering=0
-scam: legitimate=0, spam=0, phishing=0, scam=7, socialEngineering=0
-socialEngineering: legitimate=0, spam=0, phishing=0, scam=0, socialEngineering=7
-
-ML-only confusion matrix:
-legitimate: legitimate=8, spam=0, phishing=0, scam=0, socialEngineering=0
-spam: legitimate=0, spam=6, phishing=0, scam=0, socialEngineering=0
-phishing: legitimate=0, spam=0, phishing=6, scam=0, socialEngineering=1
-scam: legitimate=0, spam=0, phishing=0, scam=7, socialEngineering=0
-socialEngineering: legitimate=0, spam=0, phishing=0, scam=0, socialEngineering=7
-
-Hybrid confusion matrix:
-legitimate: legitimate=8, spam=0, phishing=0, scam=0, socialEngineering=0
-spam: legitimate=0, spam=6, phishing=0, scam=0, socialEngineering=0
-phishing: legitimate=0, spam=0, phishing=7, scam=0, socialEngineering=0
-scam: legitimate=0, spam=0, phishing=0, scam=7, socialEngineering=0
-socialEngineering: legitimate=0, spam=0, phishing=0, scam=0, socialEngineering=7
-====================================
-
-00:12 +7: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_cross_validation_error_analysis_test.dart: analyzes errors across deterministic 5-fold cross-validation
-00:12 +7: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/hybrid_threat_diagnostic_test.dart: diagnoses hybrid routing on held-out cases
+00:00 +0: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/hybrid_threat_diagnostic_test.dart: diagnoses hybrid routing on held-out cases
 
 ===== HYBRID ROUTING DIAGNOSTIC =====
 Training examples: 70
@@ -169,93 +92,87 @@ Cases where ML changed the final classification:
   None
 ===================
 
-00:12 +8: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_cross_validation_error_analysis_test.dart: analyzes errors across deterministic 5-fold cross-validation
-00:12 +8: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_cv_true_error_analysis_test.dart: reproduces and analyzes true 5-fold CV errors
+00:01 +1: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/logistic_regression_error_analysis_test.dart: prints held-out classification errors
+00:02 +2: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/logistic_regression_error_analysis_test.dart: prints held-out classification errors
 
-======================================================================
-THREATGUARD V0.6 ΓÇö TRUE 5-FOLD CV ERROR ANALYSIS
-======================================================================
+===== ML ERROR ANALYSIS =====
 
-------------------------------------------------------------
-FOLD 1: 82 train / 23 test
-------------------------------------------------------------
+Case: phishing_001
+Expected: phishing
+Predicted: socialEngineering
+Confidence: 0.9089
+Feature vector: [147.0, 20.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0]
 
-------------------------------------------------------------
-FOLD 2: 84 train / 21 test
-------------------------------------------------------------
+Total errors: 1
+============================
 
-------------------------------------------------------------
-FOLD 3: 84 train / 21 test
-------------------------------------------------------------
+00:02 +3: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/logistic_regression_classifier_test.dart: trains logistic regression classifier
+00:03 +4: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/hybrid_threat_evaluation_test.dart: evaluates rule-only, ML-only, and hybrid on held-out cases
 
-------------------------------------------------------------
-FOLD 4: 84 train / 21 test
-------------------------------------------------------------
+===== HYBRID THREAT EVALUATION =====
+Training examples: 70
+Held-out test examples: 35
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-CV ERROR
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-Fold:       4
-Case:       phishing_013
-Expected:   phishing
-Predicted:  socialEngineering
-Confidence: 60.29%
+Rule-only: 35/35 (100.0%)
+ML-only:   34/35 (97.1%)
+Hybrid:    35/35 (100.0%)
 
-Message:
-Please enter your verification code to confirm your account immediately.
+Rule-only confusion matrix:
+legitimate: legitimate=8, spam=0, phishing=0, scam=0, socialEngineering=0
+spam: legitimate=0, spam=6, phishing=0, scam=0, socialEngineering=0
+phishing: legitimate=0, spam=0, phishing=7, scam=0, socialEngineering=0
+scam: legitimate=0, spam=0, phishing=0, scam=7, socialEngineering=0
+socialEngineering: legitimate=0, spam=0, phishing=0, scam=0, socialEngineering=7
 
---- Numeric Features ---
-messageLength: 72
-wordCount:     10
-urlCount:      0
+ML-only confusion matrix:
+legitimate: legitimate=8, spam=0, phishing=0, scam=0, socialEngineering=0
+spam: legitimate=0, spam=6, phishing=0, scam=0, socialEngineering=0
+phishing: legitimate=0, spam=0, phishing=6, scam=0, socialEngineering=1
+scam: legitimate=0, spam=0, phishing=0, scam=7, socialEngineering=0
+socialEngineering: legitimate=0, spam=0, phishing=0, scam=0, socialEngineering=7
 
---- Threat Signals ---
-hasUrgency:              true
-hasAccountSecurity:      false
-hasCredential:            true
-hasFinancial:             false
-hasPrizeReward:           false
-hasSecrecy:               false
-hasAuthority:             false
-hasPromotion:             false
-hasDeliveryContext:     false
+Hybrid confusion matrix:
+legitimate: legitimate=8, spam=0, phishing=0, scam=0, socialEngineering=0
+spam: legitimate=0, spam=6, phishing=0, scam=0, socialEngineering=0
+phishing: legitimate=0, spam=0, phishing=7, scam=0, socialEngineering=0
+scam: legitimate=0, spam=0, phishing=0, scam=7, socialEngineering=0
+socialEngineering: legitimate=0, spam=0, phishing=0, scam=0, socialEngineering=7
+====================================
 
---- URL Features ---
-hasUrl:                   false
-hasSuspiciousUrl:         false
-hasIpUrl:                 false
-hasPunycodeUrl:           false
-hasEmbeddedCredentialsUrl: false
-hasNonStandardPortUrl:    false
-hasExcessiveSubdomainsUrl: false
-hasShortenerUrl:          false
+00:05 +5: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_cross_validation_diagnostic_test.dart: evaluates ML model with deterministic 5-fold stratified cross-validation
+00:05 +6: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_cross_validation_diagnostic_test.dart: evaluates ML model with deterministic 5-fold stratified cross-validation
+00:05 +6: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/majority_class_classifier_test.dart: measures majority-class baseline accuracy
 
---- Context Features ---
-hasAccountVerification:   true
-hasIdentityVerification:  false
-hasCredentialRequest:     true
-hasStrongCredentialRequest: true
+===== MAJORITY CLASS BASELINE =====
+Total examples: 105
+Correct predictions: 24
+Accuracy: 22.9%
+===================================
 
---- Interaction Features ---
-hasPrizeFinancialCombination: false
-hasAccountCredentialCombination: true
-hasAuthorityCredentialCombination: false
-hasUrgencyCredentialCombination: true
+00:05 +7: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_cross_validation_diagnostic_test.dart: evaluates ML model with deterministic 5-fold stratified cross-validation
 
+===== ML 5-FOLD CROSS-VALIDATION =====
+Total examples: 105
+Number of folds: 5
 
-------------------------------------------------------------
-FOLD 5: 86 train / 19 test
-------------------------------------------------------------
+Each case is used for testing exactly once.
+This is a robustness/generalization diagnostic, not a production model change.
 
-======================================================================
-CV SUMMARY
-======================================================================
-Correct: 104/105
-Accuracy: 99.0%
-Errors: 1
-  Fold 4: phishing_013 phishing -> socialEngineering (60.29%)
-======================================================================
-00:12 +9: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_cross_validation_error_analysis_test.dart: analyzes errors across deterministic 5-fold cross-validation
+Fold 1: training=82, testing=23, correct=23/23, accuracy=100.0%
+Fold 2: training=84, testing=21, correct=21/21, accuracy=100.0%
+Fold 3: training=84, testing=21, correct=21/21, accuracy=100.0%
+Fold 4: training=84, testing=21, correct=20/21, accuracy=95.2%
+Fold 5: training=86, testing=19, correct=19/19, accuracy=100.0%
+
+----- SUMMARY -----
+Total held-out predictions: 105
+Total correct: 104
+5-fold cross-validation accuracy: 99.0%
+
+Interpretation: every case was evaluated by a model that was not trained on that case.
+==============================
+
+00:06 +8: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_cross_validation_error_analysis_test.dart: analyzes errors across deterministic 5-fold cross-validation
 
 ===== ML 5-FOLD ERROR ANALYSIS =====
 Total examples: 105
@@ -282,31 +199,25 @@ Cross-validation accuracy: 99.0%
 Misclassified: 1
 ==============================
 
-00:12 +10: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_cross_validation_diagnostic_test.dart: evaluates ML model with deterministic 5-fold stratified cross-validation
+00:08 +9: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/logistic_regression_evaluation_test.dart: evaluates logistic regression on held-out test cases
 
-===== ML 5-FOLD CROSS-VALIDATION =====
-Total examples: 105
-Number of folds: 5
+===== LOGISTIC REGRESSION EVALUATION =====
+Training examples: 70
+Test examples: 35
+Correct predictions: 34
+Accuracy: 97.1%
 
-Each case is used for testing exactly once.
-This is a robustness/generalization diagnostic, not a production model change.
+Confusion matrix:
+Actual ΓåÆ Predicted
 
-Fold 1: training=82, testing=23, correct=23/23, accuracy=100.0%
-Fold 2: training=84, testing=21, correct=21/21, accuracy=100.0%
-Fold 3: training=84, testing=21, correct=21/21, accuracy=100.0%
-Fold 4: training=84, testing=21, correct=20/21, accuracy=95.2%
-Fold 5: training=86, testing=19, correct=19/19, accuracy=100.0%
+legitimate: legitimate=8, spam=0, phishing=0, scam=0, socialEngineering=0
+spam: legitimate=0, spam=6, phishing=0, scam=0, socialEngineering=0
+phishing: legitimate=0, spam=0, phishing=6, scam=0, socialEngineering=1
+scam: legitimate=0, spam=0, phishing=0, scam=7, socialEngineering=0
+socialEngineering: legitimate=0, spam=0, phishing=0, scam=0, socialEngineering=7
+===========================================
 
------ SUMMARY -----
-Total held-out predictions: 105
-Total correct: 104
-5-fold cross-validation accuracy: 99.0%
-
-Interpretation: every case was evaluated by a model that was not trained on that case.
-==============================
-
-00:14 +11: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_distribution_diagnostic_test.dart: analyzes feature distribution across threat classes
-00:14 +11: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_dataset_diagnostic_test.dart: prints ML dataset summary and interaction feature usage
+00:09 +10: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_dataset_diagnostic_test.dart: prints ML dataset summary and interaction feature usage
 
 ===== THREATGUARD ML DATASET SUMMARY =====
 Total examples: 105
@@ -346,8 +257,6 @@ social_004 | label=socialEngineering | authority+credential, urgency+credential
 social_005 | label=socialEngineering | authority+credential, urgency+credential
 social_006 | label=socialEngineering | account+credential, authority+credential, urgency+credential
 social_007 | label=socialEngineering | authority+credential, urgency+credential
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_distribution_diagnostic_test.dart: analyzes feature distribution across threat classes
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_dataset_diagnostic_test.dart: prints ML dataset summary and interaction feature usage
 social_009 | label=socialEngineering | account+credential, authority+credential, urgency+credential
 social_010 | label=socialEngineering | authority+credential, urgency+credential
 phishing_012 | label=phishing | account+credential
@@ -355,291 +264,29 @@ phishing_013 | label=phishing | account+credential, urgency+credential
 phishing_015 | label=phishing | account+credential
 scam_011 | label=scam | prize+financial
 scam_012 | label=scam | prize+financial
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_distribution_diagnostic_test.dart: analyzes feature distribution across threat classes
-
-===== ML FEATURE DISTRIBUTION =====
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_dataset_diagnostic_test.dart: prints ML dataset summary and interaction feature usage
 scam_013 | label=scam | prize+financial
 scam_014 | label=scam | prize+financial
 social_011 | label=socialEngineering | authority+credential, urgency+credential
 social_012 | label=socialEngineering | account+credential, authority+credential, urgency+credential
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_distribution_diagnostic_test.dart: analyzes feature distribution across threat classes
-Total examples: 105
-
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_dataset_diagnostic_test.dart: prints ML dataset summary and interaction feature usage
 social_013 | label=socialEngineering | authority+credential, urgency+credential
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_distribution_diagnostic_test.dart: analyzes feature distribution across threat classes
-Class counts:
-  legitimate: 24
-  spam: 19
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_dataset_diagnostic_test.dart: prints ML dataset summary and interaction feature usage
 social_015 | label=socialEngineering | account+credential, authority+credential, urgency+credential
 scam_015 | label=scam | prize+financial
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_distribution_diagnostic_test.dart: analyzes feature distribution across threat classes
-  phishing: 21
-  scam: 20
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_dataset_diagnostic_test.dart: prints ML dataset summary and interaction feature usage
 scam_016 | label=scam | prize+financial
 scam_017 | label=scam | prize+financial
 scam_018 | label=scam | prize+financial
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_distribution_diagnostic_test.dart: analyzes feature distribution across threat classes
-  socialEngineering: 21
-
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_dataset_diagnostic_test.dart: prints ML dataset summary and interaction feature usage
 scam_019 | label=scam | prize+financial
 scam_020 | label=scam | prize+financial
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_distribution_diagnostic_test.dart: analyzes feature distribution across threat classes
------ BOOLEAN FEATURE DISTRIBUTION -----
-
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_dataset_diagnostic_test.dart: prints ML dataset summary and interaction feature usage
 social_016 | label=socialEngineering | authority+credential, urgency+credential
 social_018 | label=socialEngineering | urgency+credential
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_distribution_diagnostic_test.dart: analyzes feature distribution across threat classes
-hasUrgency
-  legitimate           1/24 (4.2%)
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_dataset_diagnostic_test.dart: prints ML dataset summary and interaction feature usage
 social_019 | label=socialEngineering | account+credential, authority+credential, urgency+credential
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_distribution_diagnostic_test.dart: analyzes feature distribution across threat classes
-  spam                 8/19 (42.1%)
-  phishing             9/21 (42.9%)
-  scam                 1/20 (5.0%)
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_dataset_diagnostic_test.dart: prints ML dataset summary and interaction feature usage
 social_020 | label=socialEngineering | account+credential, authority+credential, urgency+credential
 social_021 | label=socialEngineering | account+credential, authority+credential
+00:09 +11: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_dataset_diagnostic_test.dart: prints ML dataset summary and interaction feature usage
 
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_distribution_diagnostic_test.dart: analyzes feature distribution across threat classes
-  socialEngineering    20/21 (95.2%)
-
-hasAccountSecurity
-00:14 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_dataset_diagnostic_test.dart: prints ML dataset summary and interaction feature usage
 ============================================
-00:14 +13: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_distribution_diagnostic_test.dart: analyzes feature distribution across threat classes
-  legitimate           1/24 (4.2%)
-  spam                 0/19 (0.0%)
-  phishing             19/21 (90.5%)
-  scam                 0/20 (0.0%)
-  socialEngineering    7/21 (33.3%)
-
-hasCredential
-  legitimate           2/24 (8.3%)
-  spam                 0/19 (0.0%)
-  phishing             18/21 (85.7%)
-  scam                 0/20 (0.0%)
-  socialEngineering    17/21 (81.0%)
-
-hasFinancial
-  legitimate           1/24 (4.2%)
-  spam                 0/19 (0.0%)
-  phishing             2/21 (9.5%)
-  scam                 20/20 (100.0%)
-  socialEngineering    4/21 (19.0%)
-
-hasPrizeReward
-  legitimate           0/24 (0.0%)
-  spam                 10/19 (52.6%)
-  phishing             0/21 (0.0%)
-  scam                 20/20 (100.0%)
-  socialEngineering    0/21 (0.0%)
-
-hasSecrecy
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             0/21 (0.0%)
-  scam                 0/20 (0.0%)
-  socialEngineering    9/21 (42.9%)
-
-hasAuthority
-  legitimate           5/24 (20.8%)
-  spam                 0/19 (0.0%)
-  phishing             0/21 (0.0%)
-  scam                 0/20 (0.0%)
-  socialEngineering    20/21 (95.2%)
-
-hasPromotion
-  legitimate           0/24 (0.0%)
-  spam                 19/19 (100.0%)
-  phishing             0/21 (0.0%)
-  scam                 2/20 (10.0%)
-  socialEngineering    0/21 (0.0%)
-
-hasDeliveryContext
-  legitimate           2/24 (8.3%)
-  spam                 0/19 (0.0%)
-  phishing             0/21 (0.0%)
-00:14 +14: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_distribution_diagnostic_test.dart: analyzes feature distribution across threat classes
-  scam                 0/20 (0.0%)
-  socialEngineering    4/21 (19.0%)
-
-hasUrl
-  legitimate           3/24 (12.5%)
-  spam                 0/19 (0.0%)
-  phishing             10/21 (47.6%)
-  scam                 2/20 (10.0%)
-  socialEngineering    1/21 (4.8%)
-
-hasSuspiciousUrl
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             6/21 (28.6%)
-  scam                 1/20 (5.0%)
-  socialEngineering    1/21 (4.8%)
-
-hasIpUrl
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             1/21 (4.8%)
-  scam                 0/20 (0.0%)
-  socialEngineering    0/21 (0.0%)
-
-hasPunycodeUrl
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             1/21 (4.8%)
-  scam                 0/20 (0.0%)
-  socialEngineering    0/21 (0.0%)
-
-hasEmbeddedCredentialsUrl
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             1/21 (4.8%)
-  scam                 0/20 (0.0%)
-  socialEngineering    0/21 (0.0%)
-
-hasNonStandardPortUrl
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             1/21 (4.8%)
-  scam                 0/20 (0.0%)
-  socialEngineering    0/21 (0.0%)
-
-hasExcessiveSubdomainsUrl
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             1/21 (4.8%)
-  scam                 0/20 (0.0%)
-  socialEngineering    0/21 (0.0%)
-
-hasShortenerUrl
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             1/21 (4.8%)
-  scam                 1/20 (5.0%)
-  socialEngineering    1/21 (4.8%)
-
-hasAccountVerification
-  legitimate           1/24 (4.2%)
-  spam                 0/19 (0.0%)
-  phishing             9/21 (42.9%)
-  scam                 0/20 (0.0%)
-  socialEngineering    6/21 (28.6%)
-
-hasIdentityVerification
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             5/21 (23.8%)
-  scam                 0/20 (0.0%)
-  socialEngineering    0/21 (0.0%)
-
-hasCredentialRequest
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             9/21 (42.9%)
-  scam                 0/20 (0.0%)
-  socialEngineering    17/21 (81.0%)
-
-hasStrongCredentialRequest
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             3/21 (14.3%)
-  scam                 0/20 (0.0%)
-  socialEngineering    13/21 (61.9%)
-
-hasPrizeFinancialCombination
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             0/21 (0.0%)
-  scam                 20/20 (100.0%)
-  socialEngineering    0/21 (0.0%)
-
-hasAccountCredentialCombination
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             9/21 (42.9%)
-  scam                 0/20 (0.0%)
-  socialEngineering    7/21 (33.3%)
-
-hasAuthorityCredentialCombination
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             0/21 (0.0%)
-  scam                 0/20 (0.0%)
-  socialEngineering    16/21 (76.2%)
-
-hasUrgencyCredentialCombination
-  legitimate           0/24 (0.0%)
-  spam                 0/19 (0.0%)
-  phishing             3/21 (14.3%)
-  scam                 0/20 (0.0%)
-  socialEngineering    16/21 (76.2%)
-
------ NUMERIC FEATURE DISTRIBUTION -----
-
-messageLength
-  legitimate           mean=77.6, min=59, max=107
-  spam                 mean=70.4, min=55, max=88
-  phishing             mean=93.5, min=69, max=147
-  scam                 mean=84.2, min=68, max=104
-  socialEngineering    mean=95.9, min=75, max=135
-
-wordCount
-  legitimate           mean=11.8, min=8, max=16
-  spam                 mean=10.5, min=8, max=13
-  phishing             mean=12.4, min=7, max=20
-  scam                 mean=13.9, min=10, max=17
-  socialEngineering    mean=14.0, min=11, max=20
-
-urlCount
-  legitimate           mean=0.1, min=0, max=1
-  spam                 mean=0.0, min=0, max=0
-  phishing             mean=0.5, min=0, max=1
-  scam                 mean=0.1, min=0, max=1
-  socialEngineering    mean=0.0, min=0, max=1
-
------ ENCODED FEATURE ORDER -----
-
-Total encoded features: 28
-  [0] messageLength = 67.0
-  [1] wordCount = 13.0
-  [2] urlCount = 0.0
-  [3] hasUrgency = 0.0
-  [4] hasAccountSecurity = 0.0
-  [5] hasCredential = 0.0
-  [6] hasFinancial = 0.0
-  [7] hasPrizeReward = 0.0
-  [8] hasSecrecy = 0.0
-  [9] hasAuthority = 0.0
-  [10] hasPromotion = 0.0
-  [11] hasDeliveryContext = 0.0
-  [12] hasUrl = 0.0
-  [13] hasSuspiciousUrl = 0.0
-  [14] hasIpUrl = 0.0
-  [15] hasPunycodeUrl = 0.0
-  [16] hasEmbeddedCredentialsUrl = 0.0
-  [17] hasNonStandardPortUrl = 0.0
-  [18] hasExcessiveSubdomainsUrl = 0.0
-  [19] hasShortenerUrl = 0.0
-  [20] hasAccountVerification = 0.0
-  [21] hasIdentityVerification = 0.0
-  [22] hasCredentialRequest = 0.0
-  [23] hasStrongCredentialRequest = 0.0
-  [24] hasPrizeFinancialCombination = 0.0
-  [25] hasAccountCredentialCombination = 0.0
-  [26] hasAuthorityCredentialCombination = 0.0
-  [27] hasUrgencyCredentialCombination = 0.0
-
-====================================
-
-00:14 +15: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_error_feature_analysis_test.dart: prints detailed feature analysis for current ML errors
+00:09 +12: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_cv_true_error_analysis_test.dart: reproduces and analyzes true 5-fold CV errors
+00:09 +13: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_cv_true_error_analysis_test.dart: reproduces and analyzes true 5-fold CV errors
+00:10 +13: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_error_feature_analysis_test.dart: prints detailed feature analysis for current ML errors
 
 ============================================================
 THREATGUARD V0.6 ΓÇö ML ERROR FEATURE ANALYSIS
@@ -883,18 +530,349 @@ INTERACTION FEATURES
 ============================================================
 END OF ERROR ANALYSIS
 ============================================================
-00:15 +16: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_encoder_test.dart: MlFeatureEncoder encodes a feature vector into 27 numeric values
-00:15 +17: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_encoder_test.dart: MlFeatureEncoder preserves numeric message features
-00:15 +18: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_encoder_test.dart: MlFeatureEncoder encodes boolean features as zero or one
-00:15 +19: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_extractor_test.dart: MlFeatureExtractor extracts phishing-related features correctly
-00:15 +20: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_extractor_test.dart: MlFeatureExtractor extracts scam-related features correctly
-00:15 +21: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_extractor_test.dart: MlFeatureExtractor extracts credential request features correctly
-00:15 +22: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_extractor_test.dart: MlFeatureExtractor does not mark a normal message as suspicious URL
-00:15 +23: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_extractor_test.dart: MlFeatureExtractor handles a plain legitimate message
-00:16 +24: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_training_dataset_test.dart: MlTrainingDataset builds all V0.6 evaluation cases
-00:16 +25: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_training_dataset_test.dart: MlTrainingDataset contains all five threat classes
-00:16 +26: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_training_dataset_test.dart: MlTrainingDataset preserves case IDs from the evaluation dataset
-00:16 +27: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_training_set_diagnostic_test.dart: diagnoses logistic regression on the full training dataset
+00:10 +14: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_cv_true_error_analysis_test.dart: reproduces and analyzes true 5-fold CV errors
+
+======================================================================
+THREATGUARD V0.6 ΓÇö TRUE 5-FOLD CV ERROR ANALYSIS
+======================================================================
+
+------------------------------------------------------------
+FOLD 1: 82 train / 23 test
+------------------------------------------------------------
+
+------------------------------------------------------------
+FOLD 2: 84 train / 21 test
+------------------------------------------------------------
+
+------------------------------------------------------------
+FOLD 3: 84 train / 21 test
+------------------------------------------------------------
+
+------------------------------------------------------------
+FOLD 4: 84 train / 21 test
+------------------------------------------------------------
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CV ERROR
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Fold:       4
+Case:       phishing_013
+Expected:   phishing
+Predicted:  socialEngineering
+Confidence: 60.29%
+
+Message:
+Please enter your verification code to confirm your account immediately.
+
+--- Numeric Features ---
+messageLength: 72
+wordCount:     10
+urlCount:      0
+
+--- Threat Signals ---
+hasUrgency:              true
+hasAccountSecurity:      false
+hasCredential:            true
+hasFinancial:             false
+hasPrizeReward:           false
+hasSecrecy:               false
+hasAuthority:             false
+hasPromotion:             false
+hasDeliveryContext:     false
+
+--- URL Features ---
+hasUrl:                   false
+hasSuspiciousUrl:         false
+hasIpUrl:                 false
+hasPunycodeUrl:           false
+hasEmbeddedCredentialsUrl: false
+hasNonStandardPortUrl:    false
+hasExcessiveSubdomainsUrl: false
+hasShortenerUrl:          false
+
+--- Context Features ---
+hasAccountVerification:   true
+hasIdentityVerification:  false
+hasCredentialRequest:     true
+hasStrongCredentialRequest: true
+
+--- Interaction Features ---
+hasPrizeFinancialCombination: false
+hasAccountCredentialCombination: true
+hasAuthorityCredentialCombination: false
+hasUrgencyCredentialCombination: true
+
+
+------------------------------------------------------------
+FOLD 5: 86 train / 19 test
+------------------------------------------------------------
+
+======================================================================
+CV SUMMARY
+======================================================================
+Correct: 104/105
+Accuracy: 99.0%
+Errors: 1
+  Fold 4: phishing_013 phishing -> socialEngineering (60.29%)
+======================================================================
+00:10 +15: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_distribution_diagnostic_test.dart: analyzes feature distribution across threat classes
+
+===== ML FEATURE DISTRIBUTION =====
+Total examples: 105
+
+Class counts:
+  legitimate: 24
+  spam: 19
+  phishing: 21
+  scam: 20
+  socialEngineering: 21
+
+----- BOOLEAN FEATURE DISTRIBUTION -----
+
+hasUrgency
+  legitimate           1/24 (4.2%)
+  spam                 8/19 (42.1%)
+  phishing             9/21 (42.9%)
+  scam                 1/20 (5.0%)
+  socialEngineering    20/21 (95.2%)
+
+hasAccountSecurity
+  legitimate           1/24 (4.2%)
+  spam                 0/19 (0.0%)
+  phishing             19/21 (90.5%)
+  scam                 0/20 (0.0%)
+  socialEngineering    7/21 (33.3%)
+
+hasCredential
+  legitimate           2/24 (8.3%)
+  spam                 0/19 (0.0%)
+  phishing             18/21 (85.7%)
+  scam                 0/20 (0.0%)
+  socialEngineering    17/21 (81.0%)
+
+hasFinancial
+  legitimate           1/24 (4.2%)
+  spam                 0/19 (0.0%)
+  phishing             2/21 (9.5%)
+  scam                 20/20 (100.0%)
+  socialEngineering    4/21 (19.0%)
+
+hasPrizeReward
+  legitimate           0/24 (0.0%)
+  spam                 10/19 (52.6%)
+  phishing             0/21 (0.0%)
+  scam                 20/20 (100.0%)
+  socialEngineering    0/21 (0.0%)
+
+hasSecrecy
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             0/21 (0.0%)
+  scam                 0/20 (0.0%)
+  socialEngineering    9/21 (42.9%)
+
+hasAuthority
+  legitimate           5/24 (20.8%)
+  spam                 0/19 (0.0%)
+  phishing             0/21 (0.0%)
+  scam                 0/20 (0.0%)
+  socialEngineering    20/21 (95.2%)
+
+hasPromotion
+  legitimate           0/24 (0.0%)
+  spam                 19/19 (100.0%)
+  phishing             0/21 (0.0%)
+  scam                 2/20 (10.0%)
+  socialEngineering    0/21 (0.0%)
+
+hasDeliveryContext
+  legitimate           2/24 (8.3%)
+  spam                 0/19 (0.0%)
+  phishing             0/21 (0.0%)
+  scam                 0/20 (0.0%)
+  socialEngineering    4/21 (19.0%)
+
+hasUrl
+  legitimate           3/24 (12.5%)
+  spam                 0/19 (0.0%)
+  phishing             10/21 (47.6%)
+  scam                 2/20 (10.0%)
+  socialEngineering    1/21 (4.8%)
+
+hasSuspiciousUrl
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             6/21 (28.6%)
+  scam                 1/20 (5.0%)
+  socialEngineering    1/21 (4.8%)
+
+hasIpUrl
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             1/21 (4.8%)
+  scam                 0/20 (0.0%)
+  socialEngineering    0/21 (0.0%)
+
+hasPunycodeUrl
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             1/21 (4.8%)
+  scam                 0/20 (0.0%)
+  socialEngineering    0/21 (0.0%)
+
+hasEmbeddedCredentialsUrl
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             1/21 (4.8%)
+  scam                 0/20 (0.0%)
+  socialEngineering    0/21 (0.0%)
+
+hasNonStandardPortUrl
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             1/21 (4.8%)
+  scam                 0/20 (0.0%)
+  socialEngineering    0/21 (0.0%)
+
+hasExcessiveSubdomainsUrl
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             1/21 (4.8%)
+  scam                 0/20 (0.0%)
+  socialEngineering    0/21 (0.0%)
+
+hasShortenerUrl
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             1/21 (4.8%)
+  scam                 1/20 (5.0%)
+  socialEngineering    1/21 (4.8%)
+
+hasAccountVerification
+  legitimate           1/24 (4.2%)
+  spam                 0/19 (0.0%)
+  phishing             9/21 (42.9%)
+  scam                 0/20 (0.0%)
+  socialEngineering    6/21 (28.6%)
+
+hasIdentityVerification
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             5/21 (23.8%)
+  scam                 0/20 (0.0%)
+  socialEngineering    0/21 (0.0%)
+
+hasCredentialRequest
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             9/21 (42.9%)
+  scam                 0/20 (0.0%)
+  socialEngineering    17/21 (81.0%)
+
+hasStrongCredentialRequest
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             3/21 (14.3%)
+  scam                 0/20 (0.0%)
+  socialEngineering    13/21 (61.9%)
+
+hasPrizeFinancialCombination
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             0/21 (0.0%)
+  scam                 20/20 (100.0%)
+  socialEngineering    0/21 (0.0%)
+
+hasAccountCredentialCombination
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             9/21 (42.9%)
+  scam                 0/20 (0.0%)
+  socialEngineering    7/21 (33.3%)
+
+hasAuthorityCredentialCombination
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             0/21 (0.0%)
+  scam                 0/20 (0.0%)
+  socialEngineering    16/21 (76.2%)
+
+hasUrgencyCredentialCombination
+  legitimate           0/24 (0.0%)
+  spam                 0/19 (0.0%)
+  phishing             3/21 (14.3%)
+  scam                 0/20 (0.0%)
+  socialEngineering    16/21 (76.2%)
+
+----- NUMERIC FEATURE DISTRIBUTION -----
+
+messageLength
+  legitimate           mean=77.6, min=59, max=107
+  spam                 mean=70.4, min=55, max=88
+  phishing             mean=93.5, min=69, max=147
+  scam                 mean=84.2, min=68, max=104
+  socialEngineering    mean=95.9, min=75, max=135
+
+wordCount
+  legitimate           mean=11.8, min=8, max=16
+  spam                 mean=10.5, min=8, max=13
+  phishing             mean=12.4, min=7, max=20
+  scam                 mean=13.9, min=10, max=17
+  socialEngineering    mean=14.0, min=11, max=20
+
+urlCount
+  legitimate           mean=0.1, min=0, max=1
+  spam                 mean=0.0, min=0, max=0
+  phishing             mean=0.5, min=0, max=1
+  scam                 mean=0.1, min=0, max=1
+  socialEngineering    mean=0.0, min=0, max=1
+
+----- ENCODED FEATURE ORDER -----
+
+Total encoded features: 28
+  [0] messageLength = 67.0
+  [1] wordCount = 13.0
+  [2] urlCount = 0.0
+  [3] hasUrgency = 0.0
+  [4] hasAccountSecurity = 0.0
+  [5] hasCredential = 0.0
+  [6] hasFinancial = 0.0
+  [7] hasPrizeReward = 0.0
+  [8] hasSecrecy = 0.0
+  [9] hasAuthority = 0.0
+  [10] hasPromotion = 0.0
+  [11] hasDeliveryContext = 0.0
+  [12] hasUrl = 0.0
+  [13] hasSuspiciousUrl = 0.0
+  [14] hasIpUrl = 0.0
+  [15] hasPunycodeUrl = 0.0
+  [16] hasEmbeddedCredentialsUrl = 0.0
+  [17] hasNonStandardPortUrl = 0.0
+  [18] hasExcessiveSubdomainsUrl = 0.0
+  [19] hasShortenerUrl = 0.0
+  [20] hasAccountVerification = 0.0
+  [21] hasIdentityVerification = 0.0
+  [22] hasCredentialRequest = 0.0
+  [23] hasStrongCredentialRequest = 0.0
+  [24] hasPrizeFinancialCombination = 0.0
+  [25] hasAccountCredentialCombination = 0.0
+  [26] hasAuthorityCredentialCombination = 0.0
+  [27] hasUrgencyCredentialCombination = 0.0
+
+====================================
+
+00:11 +16: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_encoder_test.dart: MlFeatureEncoder encodes a feature vector into 27 numeric values
+00:11 +17: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_encoder_test.dart: MlFeatureEncoder preserves numeric message features
+00:11 +18: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_encoder_test.dart: MlFeatureEncoder encodes boolean features as zero or one
+00:11 +19: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_extractor_test.dart: MlFeatureExtractor extracts phishing-related features correctly
+00:11 +20: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_extractor_test.dart: MlFeatureExtractor extracts scam-related features correctly
+00:11 +21: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_extractor_test.dart: MlFeatureExtractor extracts credential request features correctly
+00:11 +22: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_extractor_test.dart: MlFeatureExtractor does not mark a normal message as suspicious URL
+00:11 +23: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_feature_extractor_test.dart: MlFeatureExtractor handles a plain legitimate message
+00:12 +24: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_training_dataset_test.dart: MlTrainingDataset builds all V0.6 evaluation cases
+00:12 +25: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_training_dataset_test.dart: MlTrainingDataset contains all five threat classes
+00:12 +26: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_training_dataset_test.dart: MlTrainingDataset preserves case IDs from the evaluation dataset
+00:13 +27: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/ml_training_set_diagnostic_test.dart: diagnoses logistic regression on the full training dataset
 
 ===== ML TRAINING-SET DIAGNOSTIC =====
 Training examples: 105
@@ -1020,28 +998,28 @@ Per-class fit:
   socialEngineering: 21/21 (100.0%)
 ====================
 
-00:17 +28: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/sms_threat_analyzer_test.dart: analyzes an SMS message through the hybrid engine
-00:17 +29: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/sms_threat_analyzer_test.dart: rejects non-SMS messages
-00:17 +30: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer basic behavior empty message is safe
-00:17 +31: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer basic behavior normal legitimate message is safe
-00:17 +32: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer basic behavior promotional message is classified as spam
-00:17 +33: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer basic behavior credential request is classified as phishing
-00:17 +34: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer basic behavior prize with financial request is classified as scam
-00:17 +35: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer basic behavior authority plus urgency plus credential request is social engineering
-00:17 +36: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer URL detection detects a single URL
-00:17 +37: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer URL detection detects multiple URLs
-00:17 +38: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer URL detection detects www URLs
-00:17 +39: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer contextual behavior credential request with urgency increases risk
-00:17 +40: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer contextual behavior PIN request is recognized as a credential request
-00:17 +41: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer contextual behavior security code request is recognized as a credential request
-00:17 +42: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer contextual behavior urgent account verification with URL is classified as phishing
-00:17 +43: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer contextual behavior urgent account verification without URL remains suspicious
-00:17 +44: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer contextual behavior account verification with ordinary URL remains suspicious
-00:17 +45: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer URL integration URL structural signal appears in main analysis
-00:17 +46: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer URL integration URL shortener signal appears in main analysis
-00:17 +47: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer URL integration URL structural signals do not add score yet
-00:17 +48: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer URL integration ordinary URL does not create structural warning signals
-00:18 +49: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_diagnostic_test.dart: diagnose final V0.4 level mismatches
+00:13 +28: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/sms_threat_analyzer_test.dart: analyzes an SMS message through the hybrid engine
+00:13 +29: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/sms_threat_analyzer_test.dart: rejects non-SMS messages
+00:13 +30: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer basic behavior empty message is safe
+00:14 +31: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer basic behavior normal legitimate message is safe
+00:14 +32: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer basic behavior promotional message is classified as spam
+00:14 +33: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer basic behavior credential request is classified as phishing
+00:14 +34: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer basic behavior prize with financial request is classified as scam
+00:14 +35: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer basic behavior authority plus urgency plus credential request is social engineering
+00:14 +36: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer URL detection detects a single URL
+00:14 +37: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer URL detection detects multiple URLs
+00:14 +38: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer URL detection detects www URLs
+00:14 +39: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer contextual behavior credential request with urgency increases risk
+00:14 +40: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer contextual behavior PIN request is recognized as a credential request
+00:14 +41: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer contextual behavior security code request is recognized as a credential request
+00:14 +42: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer contextual behavior urgent account verification with URL is classified as phishing
+00:14 +43: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer contextual behavior urgent account verification without URL remains suspicious
+00:14 +44: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer contextual behavior account verification with ordinary URL remains suspicious
+00:14 +45: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer URL integration URL structural signal appears in main analysis
+00:14 +46: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer URL integration URL shortener signal appears in main analysis
+00:14 +47: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer URL integration URL structural signals do not add score yet
+00:14 +48: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_analyzer_test.dart: ThreatAnalyzer URL integration ordinary URL does not create structural warning signals
+00:14 +49: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_diagnostic_test.dart: diagnose final V0.4 level mismatches
 
 ========================================
 phishing_010
@@ -1142,7 +1120,7 @@ Indicators:
     The message appears to request sensitive authentication information rather than merely mentioning it.
   - Urgency combined with credential request | +0
     Time pressure is combined with a request for authentication information.
-00:18 +50: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_evaluator_test.dart: ThreatGuard evaluation dataset runs successfully
+00:14 +50: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/threat_evaluator_test.dart: ThreatGuard evaluation dataset runs successfully
 legitimate_001 | Expected: legitimate / safe | Actual: legitimate / safe | Score: 0 | Type correct: true | Level correct: true
 legitimate_002 | Expected: legitimate / safe | Actual: legitimate / safe | Score: 0 | Type correct: true | Level correct: true
 legitimate_003 | Expected: legitimate / safe | Actual: legitimate / safe | Score: 8 | Type correct: true | Level correct: true
@@ -1260,23 +1238,23 @@ Type accuracy: 97.1%
 Level accuracy: 96.2%
 Overall accuracy: 94.3%
 ========================================
-00:19 +51: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing extracts host from HTTPS URL
-00:19 +52: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing extracts host from HTTP URL
-00:19 +53: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing extracts host from www URL
-00:19 +54: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing extracts domain from subdomain
-00:19 +55: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing normalizes host to lowercase
-00:19 +56: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing handles standard HTTPS port without a signal
-00:19 +57: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing handles non-standard port
-00:19 +58: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing handles URL without path
-00:19 +59: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer structural signals detects IP address hostname
-00:19 +60: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer structural signals detects Punycode hostname
-00:19 +61: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer structural signals detects embedded user information
-00:19 +62: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer structural signals detects deep subdomain structure
-00:19 +63: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer structural signals does not flag normal subdomain structure
-00:19 +64: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer structural signals detects known URL shortener
-00:19 +65: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer structural signals does not flag ordinary domain as URL shortener
-00:19 +66: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer multiple URLs analyzes multiple URLs
-00:19 +67: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_evaluation_test.dart: ThreatGuard URL evaluation dataset runs successfully
+00:15 +51: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing extracts host from HTTPS URL
+00:15 +52: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing extracts host from HTTP URL
+00:15 +53: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing extracts host from www URL
+00:15 +54: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing extracts domain from subdomain
+00:15 +55: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing normalizes host to lowercase
+00:15 +56: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing handles standard HTTPS port without a signal
+00:15 +57: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing handles non-standard port
+00:15 +58: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer basic parsing handles URL without path
+00:15 +59: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer structural signals detects IP address hostname
+00:15 +60: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer structural signals detects Punycode hostname
+00:15 +61: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer structural signals detects embedded user information
+00:15 +62: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer structural signals detects deep subdomain structure
+00:15 +63: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer structural signals does not flag normal subdomain structure
+00:15 +64: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer structural signals detects known URL shortener
+00:15 +65: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer structural signals does not flag ordinary domain as URL shortener
+00:15 +66: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_analyzer_test.dart: UrlAnalyzer multiple URLs analyzes multiple URLs
+00:15 +67: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_evaluation_test.dart: ThreatGuard URL evaluation dataset runs successfully
 url_001_ordinary | Expected: ipAddressHost = false | Actual: false | Correct: true
 url_002_ip_host | Expected: ipAddressHost = true | Actual: true | Correct: true
 url_003_punycode | Expected: punycodeHost = true | Actual: true | Correct: true
@@ -1295,7 +1273,7 @@ Total cases: 10
 Correct cases: 10
 Accuracy: 100.0%
 ========================================
-00:19 +68: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_threat_evaluation_test.dart: ThreatGuard URL + threat evaluation runs successfully
+00:16 +68: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/url_threat_evaluation_test.dart: ThreatGuard URL + threat evaluation runs successfully
 combo_001_phishing_ip | URL signal: ipAddressHost => true | Expected threat: phishing / highRisk | Actual threat: phishing / highRisk | Score: 30 | Correct: true
 combo_002_phishing_shortener | URL signal: urlShortener => true | Expected threat: phishing / highRisk | Actual threat: phishing / highRisk | Score: 38 | Correct: true
 combo_003_phishing_punycode | URL signal: punycodeHost => true | Expected threat: phishing / highRisk | Actual threat: phishing / highRisk | Score: 48 | Correct: true
@@ -1314,5 +1292,5 @@ Total cases: 10
 Completely correct: 10
 Accuracy: 100.0%
 ========================================
-00:20 +69: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/widget_test.dart: ThreatGuard app loads
-00:20 +70: All tests passed!
+00:16 +69: C:/Users/Admin/Desktop/APss/cyber/threatguard/test/widget_test.dart: ThreatGuard app loads
+00:17 +70: All tests passed!
