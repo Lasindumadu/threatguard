@@ -717,7 +717,23 @@ class ThreatAnalyzer {
 
   String _createRecommendation(ThreatType type, ThreatLevel level) {
     if (level == ThreatLevel.safe) {
-      return 'Continue to use normal caution when interacting with messages and links.';
+      return 'No immediate action is required. The message appears low risk based on the detected signals.';
+    }
+
+    if (level == ThreatLevel.highRisk) {
+      if (type == ThreatType.phishing) {
+        return 'Do not interact with this message until it has been independently verified. Do not provide passwords, OTPs, PINs, or other sensitive information.';
+      }
+
+      if (type == ThreatType.scam) {
+        return 'Do not send money or provide financial information. Independently verify the offer before taking any action.';
+      }
+
+      if (type == ThreatType.socialEngineering) {
+        return 'Do not respond or share sensitive information until the request has been independently verified through a trusted channel.';
+      }
+
+      return 'Do not interact with this message until it has been independently verified.';
     }
 
     if (type == ThreatType.phishing) {
@@ -732,7 +748,7 @@ class ThreatAnalyzer {
       return 'Slow down and independently verify the request before responding or sharing sensitive information.';
     }
 
-    return 'Be cautious with this message and verify the sender before taking action.';
+    return 'Be cautious with this message. Avoid providing sensitive information or following instructions until the sender is independently verified.';
   }
 
   bool _containsAny(String text, List<String> patterns) {

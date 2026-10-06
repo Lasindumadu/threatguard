@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/models/hybrid_threat_analysis.dart';
+import '../../../../core/models/ml_feature_vector.dart';
 import '../../../../core/models/threat_analysis.dart';
-import '../../../../core/services/threat_analyzer.dart';
+import '../../../../core/services/hybrid_threat_analyzer.dart';
+import '../../../../core/services/logistic_regression_classifier.dart';
+import '../../../../core/services/ml_feature_encoder.dart';
+import '../../../../core/services/ml_training_dataset.dart';
 
 class AnalyzerScreen extends StatefulWidget {
   const AnalyzerScreen({super.key});
@@ -12,9 +17,29 @@ class AnalyzerScreen extends StatefulWidget {
 
 class _AnalyzerScreenState extends State<AnalyzerScreen> {
   final TextEditingController _messageController = TextEditingController();
-  final ThreatAnalyzer _analyzer = ThreatAnalyzer();
 
-  ThreatAnalysis? _analysis;
+  late final HybridThreatAnalyzer _analyzer;
+
+  HybridThreatAnalysis? _analysis;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final trainingExamples = const MlTrainingDataset().build();
+    final featureEncoder = const MlFeatureEncoder();
+
+    final featureVectors = trainingExamples
+        .map((example) => featureEncoder.encode(example.features))
+        .toList();
+
+    final classifier = LogisticRegressionClassifier.train(
+      examples: trainingExamples,
+      featureVectors: featureVectors,
+    );
+
+    _analyzer = HybridThreatAnalyzer(classifier: classifier);
+  }
 
   @override
   void dispose() {
@@ -90,25 +115,38 @@ class _AnalyzerScreenState extends State<AnalyzerScreen> {
 }
 
 class _AnalysisCard extends StatelessWidget {
-  final ThreatAnalysis analysis;
+  final HybridThreatAnalysis analysis;
 
   const _AnalysisCard({required this.analysis});
 
   @override
   Widget build(BuildContext context) {
-    final levelText = switch (analysis.level) {
+    final ruleAnalysis = analysis.ruleAnalysis;
+
+    final levelText = switch (ruleAnalysis.level) {
       ThreatLevel.safe => 'SAFE',
       ThreatLevel.suspicious => 'SUSPICIOUS',
       ThreatLevel.highRisk => 'HIGH RISK',
     };
 
-    final typeText = switch (analysis.type) {
+    final typeText = switch (analysis.finalType) {
       ThreatType.legitimate => 'LEGITIMATE',
       ThreatType.spam => 'SPAM',
       ThreatType.phishing => 'PHISHING',
       ThreatType.scam => 'SCAM',
       ThreatType.socialEngineering => 'SOCIAL ENGINEERING',
     };
+
+    final mlTypeText = switch (analysis.mlPrediction.type) {
+      MlThreatType.legitimate => 'LEGITIMATE',
+      MlThreatType.spam => 'SPAM',
+      MlThreatType.phishing => 'PHISHING',
+      MlThreatType.scam => 'SCAM',
+      MlThreatType.socialEngineering => 'SOCIAL ENGINEERING',
+    };
+
+    final mlConfidence =
+        '${(analysis.mlPrediction.confidence * 100).toStringAsFixed(1)}%';
 
     return Card(
       child: Padding(
@@ -123,17 +161,16 @@ class _AnalysisCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              analysis.summary,
+              ruleAnalysis.summary,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
-            const SizedBox(height: 24),
             const SizedBox(height: 24),
             Row(
               children: [
                 Expanded(
                   child: _ResultItem(
                     label: 'Risk Score',
-                    value: '${analysis.riskScore}/100',
+                    value: '${ruleAnalysis.riskScore}/100',
                   ),
                 ),
                 Expanded(
@@ -143,6 +180,20 @@ class _AnalysisCard extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             _ResultItem(label: 'Classification', value: typeText),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: _ResultItem(label: 'ML Prediction', value: mlTypeText),
+                ),
+                Expanded(
+                  child: _ResultItem(
+                    label: 'ML Confidence',
+                    value: mlConfidence,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 24),
             Text(
               'Detected Indicators',
@@ -150,10 +201,10 @@ class _AnalysisCard extends StatelessWidget {
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            if (analysis.indicators.isEmpty)
+            if (ruleAnalysis.indicators.isEmpty)
               const Text('No specific threat indicators detected.')
             else
-              ...analysis.indicators.map(
+              ...ruleAnalysis.indicators.map(
                 (indicator) => Padding(
                   padding: const EdgeInsets.only(bottom: 14),
                   child: Row(
@@ -187,7 +238,7 @@ class _AnalysisCard extends StatelessWidget {
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text(analysis.recommendation),
+            Text(ruleAnalysis.recommendation),
           ],
         ),
       ),

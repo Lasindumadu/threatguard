@@ -5,8 +5,8 @@ import 'package:threatguard/main.dart';
 void main() {
   testWidgets('ThreatGuard app loads', (WidgetTester tester) async {
     await tester.pumpWidget(const ThreatGuardApp());
+    await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('Message Threat Analyzer'), findsOneWidget);
-    expect(find.text('Analyze Message'), findsOneWidget);
+    expect(find.text('SMS Inbox'), findsOneWidget);
   });
 }

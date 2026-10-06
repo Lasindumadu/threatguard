@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'features/analyzer/presentation/screens/analyzer_screen.dart';
+//import 'features/analyzer/presentation/screens/analyzer_screen.dart';
+import 'features/sms/presentation/screens/sms_inbox_screen.dart';
 
 void main() {
   runApp(const ThreatGuardApp());
@@ -18,7 +19,7 @@ class ThreatGuardApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const AnalyzerScreen(),
+      home: const SmsInboxScreen(),
     );
   }
 }
