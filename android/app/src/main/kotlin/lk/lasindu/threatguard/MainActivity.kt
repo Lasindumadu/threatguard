@@ -1,4 +1,4 @@
-package com.example.threatguard
+package lk.lasindu.threatguard
 
 import android.Manifest
 import android.content.pm.PackageManager
