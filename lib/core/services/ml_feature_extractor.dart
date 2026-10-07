@@ -3,6 +3,7 @@ import '../models/threat_signal.dart';
 import '../models/url_analysis.dart';
 import 'threat_rule_catalog.dart';
 import 'url_analyzer.dart';
+import 'text_matcher.dart';
 
 class MlFeatureExtractor {
   final UrlAnalyzer urlAnalyzer;
@@ -230,7 +231,7 @@ class MlFeatureExtractor {
   bool _hasCategory(String text, ThreatSignalCategory category) {
     return ThreatRuleCatalog.rules
         .where((rule) => rule.category == category)
-        .any((rule) => rule.patterns.any(text.contains));
+        .any((rule) => TextMatcher.containsAny(text, rule.patterns));
   }
 
   bool _hasUrlSignal(List<UrlAnalysis> analyses, UrlSignalType type) {
@@ -240,7 +241,7 @@ class MlFeatureExtractor {
   }
 
   bool _containsAny(String text, List<String> patterns) {
-    return patterns.any(text.contains);
+    return TextMatcher.containsAny(text, patterns);
   }
 
   int _wordCount(String text) {

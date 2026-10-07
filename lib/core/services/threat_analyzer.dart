@@ -3,6 +3,7 @@ import '../models/threat_signal.dart';
 import '../models/url_analysis.dart';
 import 'threat_rule_catalog.dart';
 import 'url_analyzer.dart';
+import 'text_matcher.dart';
 
 class ThreatAnalyzer {
   final UrlAnalyzer urlAnalyzer;
@@ -64,7 +65,7 @@ class ThreatAnalyzer {
       String? matchedPattern;
 
       for (final pattern in rule.patterns) {
-        if (text.contains(pattern)) {
+        if (TextMatcher.contains(text, pattern)) {
           matchedPattern = pattern;
           break;
         }
@@ -752,7 +753,7 @@ class ThreatAnalyzer {
   }
 
   bool _containsAny(String text, List<String> patterns) {
-    return patterns.any(text.contains);
+    return TextMatcher.containsAny(text, patterns);
   }
 
   List<String> _extractUrls(String text) {
