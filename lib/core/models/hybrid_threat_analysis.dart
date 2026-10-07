@@ -11,4 +11,16 @@ class HybridThreatAnalysis {
     required this.mlPrediction,
     required this.finalType,
   });
+
+  ThreatLevel get finalLevel {
+    if (finalType == ThreatType.legitimate) {
+      return ThreatLevel.safe;
+    }
+
+    if (ruleAnalysis.type == ThreatType.legitimate) {
+      return ThreatLevel.suspicious;
+    }
+
+    return ruleAnalysis.level;
+  }
 }

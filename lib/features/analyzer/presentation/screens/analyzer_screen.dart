@@ -123,7 +123,7 @@ class _AnalysisCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ruleAnalysis = analysis.ruleAnalysis;
 
-    final levelText = switch (ruleAnalysis.level) {
+    final levelText = switch (analysis.finalLevel) {
       ThreatLevel.safe => 'SAFE',
       ThreatLevel.suspicious => 'SUSPICIOUS',
       ThreatLevel.highRisk => 'HIGH RISK',

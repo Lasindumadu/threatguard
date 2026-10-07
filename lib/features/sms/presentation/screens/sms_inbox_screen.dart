@@ -181,7 +181,7 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
       urls: ruleAnalysis.detectedUrls,
     );
 
-    final level = ruleAnalysis.level;
+    final level = analysis.finalLevel;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
