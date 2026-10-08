@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/models/organization_url_check.dart';
 import '../../../../core/models/sender_analysis.dart';
@@ -23,6 +24,8 @@ class SmsInboxScreen extends StatefulWidget {
 }
 
 class _SmsInboxScreenState extends State<SmsInboxScreen> {
+  static const MethodChannel _smsChannel = MethodChannel('threatguard/sms');
+
   late final HybridThreatAnalyzer _analyzer;
 
   final AndroidSmsMessageSource _messageSource =
@@ -38,6 +41,8 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
   List<ThreatMessage> _messages = const [];
   bool _isLoading = false;
   bool _isDemoMode = false;
+  bool _hasSmsPermission = false;
+  bool _smsPermissionPermanentlyDenied = false;
   String? _errorMessage;
 
   @override
@@ -58,10 +63,108 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
 
     _analyzer = HybridThreatAnalyzer(classifier: classifier);
 
-    _loadMessages();
+    _initializeInbox();
+  }
+
+  Future<void> _initializeInbox() async {
+    try {
+      final hasPermission =
+          await _smsChannel.invokeMethod<bool>('checkSmsPermission') ?? false;
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _hasSmsPermission = hasPermission;
+        _smsPermissionPermanentlyDenied = false;
+      });
+
+      if (hasPermission) {
+        await _loadMessages();
+      }
+    } on PlatformException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _errorMessage = error.message ?? 'Unable to check SMS permission.';
+      });
+    }
+  }
+
+  Future<void> _requestSmsPermission() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final granted =
+          await _smsChannel.invokeMethod<bool>('requestSmsPermission') ?? false;
+
+      if (!mounted) {
+        return;
+      }
+
+      if (granted) {
+        setState(() {
+          _hasSmsPermission = true;
+          _smsPermissionPermanentlyDenied = false;
+          _isLoading = false;
+        });
+
+        await _loadMessages();
+        return;
+      }
+
+      final permanentlyDenied =
+          await _smsChannel.invokeMethod<bool>(
+            'isSmsPermissionPermanentlyDenied',
+          ) ??
+          false;
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _hasSmsPermission = false;
+        _smsPermissionPermanentlyDenied = permanentlyDenied;
+        _isLoading = false;
+      });
+    } on PlatformException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isLoading = false;
+        _errorMessage = error.message ?? 'Unable to request SMS permission.';
+      });
+    }
+  }
+
+  Future<void> _openAppSettings() async {
+    try {
+      await _smsChannel.invokeMethod<void>('openAppSettings');
+    } on PlatformException {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _errorMessage = 'Unable to open app settings.';
+      });
+    }
   }
 
   Future<void> _loadMessages() async {
+    if (!_hasSmsPermission) {
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -79,6 +182,15 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
         _isLoading = false;
         _isDemoMode = false;
       });
+    } on PlatformException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isLoading = false;
+        _errorMessage = error.message ?? 'Unable to read SMS messages.';
+      });
     } catch (error) {
       if (!mounted) {
         return;
@@ -86,7 +198,7 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = error.toString();
+        _errorMessage = 'Unable to read SMS messages.';
       });
     }
   }
@@ -133,7 +245,7 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
             tooltip: 'Load demo messages',
           ),
           IconButton(
-            onPressed: _isLoading ? null : _loadMessages,
+            onPressed: _isLoading || !_hasSmsPermission ? null : _loadMessages,
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh messages',
           ),
@@ -165,15 +277,33 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
               const SizedBox(height: 8),
               Text(_errorMessage!, textAlign: TextAlign.center),
               const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: _loadMessages,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Try Again'),
-              ),
+              if (!_hasSmsPermission) ...[
+                if (_smsPermissionPermanentlyDenied)
+                  OutlinedButton.icon(
+                    onPressed: _openAppSettings,
+                    icon: const Icon(Icons.settings_outlined),
+                    label: const Text('Open App Settings'),
+                  )
+                else
+                  FilledButton.icon(
+                    onPressed: _requestSmsPermission,
+                    icon: const Icon(Icons.sms_outlined),
+                    label: const Text('Allow SMS Access'),
+                  ),
+              ] else
+                FilledButton.icon(
+                  onPressed: _loadMessages,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Try Again'),
+                ),
             ],
           ),
         ),
       );
+    }
+
+    if (!_hasSmsPermission && !_isDemoMode) {
+      return _buildPermissionRequest();
     }
 
     if (_messages.isEmpty) {
@@ -213,6 +343,57 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
           final messageIndex = _isDemoMode ? index - 1 : index;
           return _buildMessageCard(_messages[messageIndex]);
         },
+      ),
+    );
+  }
+
+  Widget _buildPermissionRequest() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.sms_outlined, size: 64),
+            const SizedBox(height: 20),
+            const Text(
+              'SMS Access Required',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'ThreatGuard needs access to your SMS messages '
+              'so it can analyze them for phishing, scams, spam, '
+              'and social engineering threats.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            if (_smsPermissionPermanentlyDenied) ...[
+              const Text(
+                'SMS access has been permanently denied. '
+                'Open App Settings to allow SMS access manually.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: _openAppSettings,
+                icon: const Icon(Icons.settings_outlined),
+                label: const Text('Open App Settings'),
+              ),
+            ] else
+              FilledButton.icon(
+                onPressed: _requestSmsPermission,
+                icon: const Icon(Icons.lock_open_outlined),
+                label: const Text('Allow SMS Access'),
+              ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: _loadDemoMessages,
+              child: const Text('Use Demo Messages Instead'),
+            ),
+          ],
+        ),
       ),
     );
   }
