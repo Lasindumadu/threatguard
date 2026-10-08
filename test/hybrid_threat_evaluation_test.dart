@@ -173,14 +173,9 @@ void main() {
 
     expect(testCount, 35);
 
-    expect(ruleAccuracy, greaterThanOrEqualTo(0.0));
-    expect(ruleAccuracy, lessThanOrEqualTo(1.0));
-
-    expect(mlAccuracy, greaterThanOrEqualTo(0.0));
-    expect(mlAccuracy, lessThanOrEqualTo(1.0));
-
-    expect(hybridAccuracy, greaterThanOrEqualTo(0.0));
-    expect(hybridAccuracy, lessThanOrEqualTo(1.0));
+    expect(ruleCorrect, greaterThanOrEqualTo(35));
+    expect(mlCorrect, greaterThanOrEqualTo(34));
+    expect(hybridCorrect, greaterThanOrEqualTo(35));
   });
 }
 

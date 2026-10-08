@@ -49,5 +49,6 @@ void main() {
     print('========================================');
 
     expect(report.results.length, 105);
+    expect(report.correctTypes, greaterThanOrEqualTo(102));
   });
 }
