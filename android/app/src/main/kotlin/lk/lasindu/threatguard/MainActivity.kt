@@ -19,6 +19,7 @@ class MainActivity : FlutterActivity() {
     companion object {
         private const val CHANNEL = "threatguard/sms"
         private const val READ_SMS_REQUEST_CODE = 1001
+        private const val MAX_SMS_MESSAGES = 100
     }
 
     private val smsQueryExecutor: ExecutorService =
@@ -174,16 +175,30 @@ class MainActivity : FlutterActivity() {
                         )
                     }
 
-                    while (it.moveToNext()) {
-                        val id = it.getString(idIndex)
-                        val body = it.getString(bodyIndex)
-                        val date = it.getLong(dateIndex)
+                    while (it.moveToNext() && messages.size < MAX_SMS_MESSAGES) {
+                        val id = if (it.isNull(idIndex)) {
+                            null
+                        } else {
+                            it.getString(idIndex)
+                        }
 
-                        if (id == null || body == null) {
+                        val body = if (it.isNull(bodyIndex)) {
+                            null
+                        } else {
+                            it.getString(bodyIndex)
+                        }
+
+                        val date = if (it.isNull(dateIndex)) {
+                            null
+                        } else {
+                            it.getLong(dateIndex)
+                        }
+
+                        if (id.isNullOrBlank() || body.isNullOrBlank() || date == null) {
                             continue
                         }
 
-                        val sender = if (addressIndex >= 0) {
+                        val sender = if (addressIndex >= 0 && !it.isNull(addressIndex)) {
                             it.getString(addressIndex)
                         } else {
                             null

@@ -43,30 +43,63 @@ class OrganizationUrlAnalyzer {
       );
     }
 
+    String? firstUnmatchedUrl;
+
     for (final url in urls) {
       final host = _extractHost(url);
 
       if (host == null) {
-        continue;
+        return OrganizationUrlCheck(
+          consistency: OrganizationUrlConsistency.inconsistent,
+          organization: organizationName,
+          url: url,
+          matchedDomain: null,
+        );
       }
+
+      String? matchedDomain;
 
       for (final domain in profile.officialDomains) {
         if (_matchesDomain(host, domain)) {
-          return OrganizationUrlCheck(
-            consistency: OrganizationUrlConsistency.consistent,
-            organization: organizationName,
-            url: url,
-            matchedDomain: domain,
-          );
+          matchedDomain = domain;
+          break;
+        }
+      }
+
+      if (matchedDomain == null) {
+        firstUnmatchedUrl ??= url;
+        continue;
+      }
+    }
+
+    if (firstUnmatchedUrl != null) {
+      return OrganizationUrlCheck(
+        consistency: OrganizationUrlConsistency.inconsistent,
+        organization: organizationName,
+        url: firstUnmatchedUrl,
+        matchedDomain: null,
+      );
+    }
+
+    final firstUrl = urls.first;
+    final firstHost = _extractHost(firstUrl);
+
+    String? matchedDomain;
+
+    if (firstHost != null) {
+      for (final domain in profile.officialDomains) {
+        if (_matchesDomain(firstHost, domain)) {
+          matchedDomain = domain;
+          break;
         }
       }
     }
 
     return OrganizationUrlCheck(
-      consistency: OrganizationUrlConsistency.inconsistent,
+      consistency: OrganizationUrlConsistency.consistent,
       organization: organizationName,
-      url: urls.first,
-      matchedDomain: null,
+      url: firstUrl,
+      matchedDomain: matchedDomain,
     );
   }
 
@@ -81,7 +114,11 @@ class OrganizationUrlAnalyzer {
   }
 
   String? _extractHost(String url) {
-    final uri = Uri.tryParse(url);
+    final trimmed = url.trim();
+
+    final uri = Uri.tryParse(
+      trimmed.contains('://') ? trimmed : 'https://$trimmed',
+    );
 
     if (uri == null || uri.host.isEmpty) {
       return null;

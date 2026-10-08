@@ -69,7 +69,9 @@ class HybridThreatAnalyzer {
     // Only clear weak rule hits with very high ML confidence.
     if (mlType == ThreatType.legitimate) {
       final clear =
-          score < weakRuleScore && ml.confidence >= mlDowngradeThreshold;
+          score < weakRuleScore &&
+          ruleAnalysis.level != ThreatLevel.highRisk &&
+          ml.confidence >= mlDowngradeThreshold;
 
       return clear ? ThreatType.legitimate : ruleType;
     }
