@@ -6,12 +6,14 @@ import '../../../../core/models/threat_analysis.dart';
 import '../../../../core/models/threat_message.dart';
 
 import '../../../../core/services/android_sms_message_source.dart';
+import '../../../../core/services/fake_sms_message_source.dart';
 import '../../../../core/services/hybrid_threat_analyzer.dart';
 import '../../../../core/services/logistic_regression_classifier.dart';
 import '../../../../core/services/ml_feature_encoder.dart';
 import '../../../../core/services/ml_training_dataset.dart';
 import '../../../../core/services/organization_url_analyzer.dart';
 import '../../../../core/services/sender_analyzer.dart';
+import 'sms_detail_screen.dart';
 
 class SmsInboxScreen extends StatefulWidget {
   const SmsInboxScreen({super.key});
@@ -26,6 +28,8 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
   final AndroidSmsMessageSource _messageSource =
       const AndroidSmsMessageSource();
 
+  final FakeSmsMessageSource _demoMessageSource = const FakeSmsMessageSource();
+
   final SenderAnalyzer _senderAnalyzer = const SenderAnalyzer();
 
   final OrganizationUrlAnalyzer _organizationUrlAnalyzer =
@@ -33,6 +37,7 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
 
   List<ThreatMessage> _messages = const [];
   bool _isLoading = false;
+  bool _isDemoMode = false;
   String? _errorMessage;
 
   @override
@@ -72,6 +77,37 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
       setState(() {
         _messages = messages;
         _isLoading = false;
+        _isDemoMode = false;
+      });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isLoading = false;
+        _errorMessage = error.toString();
+      });
+    }
+  }
+
+  Future<void> _loadDemoMessages() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final messages = await _demoMessageSource.readMessages();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _messages = messages;
+        _isLoading = false;
+        _isDemoMode = true;
       });
     } catch (error) {
       if (!mounted) {
@@ -91,6 +127,11 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
       appBar: AppBar(
         title: const Text('SMS Inbox'),
         actions: [
+          IconButton(
+            onPressed: _isLoading ? null : _loadDemoMessages,
+            icon: const Icon(Icons.science_outlined),
+            tooltip: 'Load demo messages',
+          ),
           IconButton(
             onPressed: _isLoading ? null : _loadMessages,
             icon: const Icon(Icons.refresh),
@@ -163,10 +204,51 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
       onRefresh: _loadMessages,
       child: ListView.builder(
         padding: const EdgeInsets.all(12),
-        itemCount: _messages.length,
+        itemCount: _messages.length + (_isDemoMode ? 1 : 0),
         itemBuilder: (context, index) {
-          return _buildMessageCard(_messages[index]);
+          if (_isDemoMode && index == 0) {
+            return _buildDemoModeBanner();
+          }
+
+          final messageIndex = _isDemoMode ? index - 1 : index;
+          return _buildMessageCard(_messages[messageIndex]);
         },
+      ),
+    );
+  }
+
+  Widget _buildDemoModeBanner() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.amber.withValues(alpha: 0.12),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.35)),
+      ),
+      child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.science_outlined, size: 20),
+          SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Demo Mode',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                SizedBox(height: 3),
+                Text(
+                  'These are simulated messages for testing. '
+                  'Tap Refresh to return to your real SMS inbox.',
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -185,45 +267,105 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(child: Icon(_iconForLevel(level))),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        message.sender ?? 'Unknown sender',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 4),
-                      _buildRiskBadge(level, ruleAnalysis.riskScore),
-                    ],
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => SmsDetailScreen(
+                message: message,
+                analysis: analysis,
+                senderAnalysis: senderAnalysis,
+                organizationUrlCheck: organizationUrlCheck,
+              ),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(child: Icon(_iconForLevel(level))),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          message.sender ?? 'Unknown sender',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        if (message.receivedAt != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            _formatReceivedAt(context, message.receivedAt!),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 4),
+                        _buildRiskBadge(level, ruleAnalysis.riskScore),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _buildSenderVerification(senderAnalysis),
-            const SizedBox(height: 10),
-            _buildOrganizationUrlVerification(organizationUrlCheck),
-            const SizedBox(height: 14),
-            Text(message.body, maxLines: 4, overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 12),
-            Text(
-              _classificationLabel(analysis.finalType),
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ],
+                  const Icon(Icons.chevron_right),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _buildSenderVerification(senderAnalysis),
+              const SizedBox(height: 10),
+              _buildOrganizationUrlVerification(organizationUrlCheck),
+              const SizedBox(height: 14),
+              Text(message.body, maxLines: 4, overflow: TextOverflow.ellipsis),
+              const SizedBox(height: 12),
+              Text(
+                _classificationLabel(analysis.finalType),
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  String _formatReceivedAt(BuildContext context, DateTime date) {
+    final localDate = date.toLocal();
+    final now = DateTime.now();
+
+    if (DateUtils.isSameDay(localDate, now)) {
+      return MaterialLocalizations.of(context)
+          .formatTimeOfDay(TimeOfDay.fromDateTime(localDate));
+    }
+
+    final yesterday = now.subtract(const Duration(days: 1));
+
+    if (DateUtils.isSameDay(localDate, yesterday)) {
+      return 'Yesterday';
+    }
+
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    return '${months[localDate.month - 1]} '
+        '${localDate.day}, ${localDate.year}';
   }
 
   Widget _buildSenderVerification(SenderAnalysis analysis) {

@@ -26,6 +26,9 @@ class AndroidSmsMessageSource implements SmsMessageSource {
         id: data['id'] as String,
         body: data['body'] as String,
         sender: data['sender'] as String?,
+        receivedAt: data['date'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(data['date'] as int)
+            : null,
         source: MessageSource.sms,
       );
     }).toList();
