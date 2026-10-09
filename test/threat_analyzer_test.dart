@@ -95,6 +95,27 @@ void main() {
 
       expect(result.detectedUrls, ['www.example.com']);
     });
+    test('detects a bare domain URL', () {
+      final result = analyzer.analyze('Please visit example.com to continue.');
+
+      expect(result.detectedUrls, ['example.com']);
+    });
+
+    test('detects a bare domain with a path', () {
+      final result = analyzer.analyze(
+        'Verify your account at secure.example.com/login now.',
+      );
+
+      expect(result.detectedUrls, ['secure.example.com/login']);
+    });
+
+    test('detects a bare Sri Lankan domain with a path', () {
+      final result = analyzer.analyze(
+        'Visit secure.example.gov.lk/login to continue.',
+      );
+
+      expect(result.detectedUrls, ['secure.example.gov.lk/login']);
+    });
   });
 
   group('ThreatAnalyzer contextual behavior', () {

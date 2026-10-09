@@ -196,15 +196,14 @@ class SmsDetailScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'Recognized organization',
+                              'Sender name matches organization',
                               style: TextStyle(fontWeight: FontWeight.w600),
                             ),
                             const SizedBox(height: 4),
                             Text(senderAnalysis.organization!),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 6),
                             Text(
-                              'Sender identity confidence: '
-                              '${(senderAnalysis.confidence * 100).toStringAsFixed(0)}%',
+                              'Sender names can be spoofed. This match does not verify the sender.',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey.shade700,

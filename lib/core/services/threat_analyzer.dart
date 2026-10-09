@@ -757,7 +757,10 @@ class ThreatAnalyzer {
   }
 
   List<String> _extractUrls(String text) {
-    final urlPattern = RegExp(r'(https?://|www\.)[^\s]+', caseSensitive: false);
+    final urlPattern = RegExp(
+      r'(?:https?://|www\.)[^\s]+|(?<![@\w.-])(?:[\w-]+\.)+[a-z]{2,}(?:/[^\s]*)?',
+      caseSensitive: false,
+    );
 
     return urlPattern
         .allMatches(text)

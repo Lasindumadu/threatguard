@@ -124,13 +124,13 @@ class _AnalysisCard extends StatelessWidget {
     final ruleAnalysis = analysis.ruleAnalysis;
 
     final levelText = switch (analysis.finalLevel) {
-      ThreatLevel.safe => 'SAFE',
+      ThreatLevel.safe => 'LOW RISK',
       ThreatLevel.suspicious => 'SUSPICIOUS',
       ThreatLevel.highRisk => 'HIGH RISK',
     };
 
     final typeText = switch (analysis.finalType) {
-      ThreatType.legitimate => 'LEGITIMATE',
+      ThreatType.legitimate => 'LIKELY LEGITIMATE',
       ThreatType.spam => 'SPAM',
       ThreatType.phishing => 'PHISHING',
       ThreatType.scam => 'SCAM',
@@ -138,7 +138,7 @@ class _AnalysisCard extends StatelessWidget {
     };
 
     final mlTypeText = switch (analysis.mlPrediction.type) {
-      MlThreatType.legitimate => 'LEGITIMATE',
+      MlThreatType.legitimate => 'LIKELY LEGITIMATE',
       MlThreatType.spam => 'SPAM',
       MlThreatType.phishing => 'PHISHING',
       MlThreatType.scam => 'SCAM',

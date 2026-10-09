@@ -1,6 +1,7 @@
 enum UrlSignalType {
   ipAddressHost,
   punycodeHost,
+  mixedScriptHost,
   embeddedCredentials,
   nonStandardPort,
   excessiveSubdomains,

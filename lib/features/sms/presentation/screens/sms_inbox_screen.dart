@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -239,11 +240,12 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
       appBar: AppBar(
         title: const Text('SMS Inbox'),
         actions: [
-          IconButton(
-            onPressed: _isLoading ? null : _loadDemoMessages,
-            icon: const Icon(Icons.science_outlined),
-            tooltip: 'Load demo messages',
-          ),
+          if (kDebugMode)
+            IconButton(
+              onPressed: _isLoading ? null : _loadDemoMessages,
+              icon: const Icon(Icons.science_outlined),
+              tooltip: 'Load demo messages',
+            ),
           IconButton(
             onPressed: _isLoading || !_hasSmsPermission ? null : _loadMessages,
             icon: const Icon(Icons.refresh),
@@ -387,11 +389,13 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
                 icon: const Icon(Icons.lock_open_outlined),
                 label: const Text('Allow SMS Access'),
               ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: _loadDemoMessages,
-              child: const Text('Use Demo Messages Instead'),
-            ),
+            if (kDebugMode) ...[
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: _loadDemoMessages,
+                child: const Text('Use Demo Messages Instead'),
+              ),
+            ],
           ],
         ),
       ),
@@ -568,15 +572,14 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Recognized organization',
+                    'Sender name matches organization',
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 4),
                   Text(analysis.organization!),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 6),
                   Text(
-                    'Sender identity confidence: '
-                    '${(analysis.confidence * 100).toStringAsFixed(0)}%',
+                    'Sender names can be spoofed. This match does not verify the sender.',
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                   ),
                 ],
@@ -613,10 +616,11 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
       case OrganizationUrlConsistency.consistent:
         return _buildVerificationBanner(
           icon: Icons.verified_outlined,
-          title: 'Link matches organization',
+
+          title: 'Link domain matches organization',
           message:
-              'The detected link matches an official domain for '
-              '${check.organization}.',
+              'The detected link uses a domain associated with '
+              '${check.organization}. This does not verify that the message or link is safe.',
         );
 
       case OrganizationUrlConsistency.inconsistent:
@@ -684,7 +688,7 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
   String _levelLabel(ThreatLevel level) {
     switch (level) {
       case ThreatLevel.safe:
-        return 'Safe';
+        return 'Low Risk';
       case ThreatLevel.suspicious:
         return 'Suspicious';
       case ThreatLevel.highRisk:
@@ -695,7 +699,7 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
   String _classificationLabel(ThreatType type) {
     switch (type) {
       case ThreatType.legitimate:
-        return 'Legitimate';
+        return 'Likely Legitimate';
       case ThreatType.spam:
         return 'Spam';
       case ThreatType.phishing:
@@ -710,7 +714,7 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
   IconData _iconForLevel(ThreatLevel level) {
     switch (level) {
       case ThreatLevel.safe:
-        return Icons.check;
+        return Icons.info_outline;
       case ThreatLevel.suspicious:
         return Icons.warning_amber;
       case ThreatLevel.highRisk:

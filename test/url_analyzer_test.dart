@@ -39,6 +39,27 @@ void main() {
       expect(result.signals, isEmpty);
     });
 
+    test('extracts domain from .co.uk hostname', () {
+      final result = analyzer.analyze('https://login.example.co.uk/account');
+
+      expect(result.host, 'login.example.co.uk');
+      expect(result.domain, 'example.co.uk');
+    });
+
+    test('extracts domain from .gov.lk hostname', () {
+      final result = analyzer.analyze('https://secure.example.gov.lk/login');
+
+      expect(result.host, 'secure.example.gov.lk');
+      expect(result.domain, 'example.gov.lk');
+    });
+
+    test('extracts domain from .co.lk hostname', () {
+      final result = analyzer.analyze('https://shop.example.co.lk/login');
+
+      expect(result.host, 'shop.example.co.lk');
+      expect(result.domain, 'example.co.lk');
+    });
+
     test('normalizes host to lowercase', () {
       final result = analyzer.analyze('https://LOGIN.Example.COM/account');
 
@@ -87,6 +108,85 @@ void main() {
           (signal) => signal.type == UrlSignalType.ipAddressHost,
         ),
         isTrue,
+      );
+    });
+
+    test('detects valid IPv4 address hostname', () {
+      final result = analyzer.analyze('http://8.8.8.8/login');
+
+      expect(
+        result.signals.any(
+          (signal) => signal.type == UrlSignalType.ipAddressHost,
+        ),
+        isTrue,
+      );
+    });
+
+    test('does not treat invalid IPv4 address as IP hostname', () {
+      final result = analyzer.analyze('http://999.999.999.999/login');
+
+      expect(
+        result.signals.any(
+          (signal) => signal.type == UrlSignalType.ipAddressHost,
+        ),
+        isFalse,
+      );
+    });
+
+    test('does not treat out-of-range IPv4 octet as valid', () {
+      final result = analyzer.analyze('http://192.168.1.999/login');
+
+      expect(
+        result.signals.any(
+          (signal) => signal.type == UrlSignalType.ipAddressHost,
+        ),
+        isFalse,
+      );
+    });
+
+    test('does not treat incomplete IPv4 address as valid', () {
+      final result = analyzer.analyze('http://192.168.1/login');
+
+      expect(
+        result.signals.any(
+          (signal) => signal.type == UrlSignalType.ipAddressHost,
+        ),
+        isFalse,
+      );
+    });
+
+    test('detects a valid IPv6 address as a hostname', () {
+      final result = analyzer.analyze('https://[2001:db8::1]/login');
+
+      expect(
+        result.signals.any(
+          (signal) => signal.type == UrlSignalType.ipAddressHost,
+        ),
+        isTrue,
+      );
+    });
+
+    test('detects a full valid IPv6 address as a hostname', () {
+      final result = analyzer.analyze(
+        'https://[2001:0db8:0000:0000:0000:ff00:0042:8329]/login',
+      );
+
+      expect(
+        result.signals.any(
+          (signal) => signal.type == UrlSignalType.ipAddressHost,
+        ),
+        isTrue,
+      );
+    });
+
+    test('does not treat an invalid IPv6 address as an IP hostname', () {
+      final result = analyzer.analyze('https://[2001:db8:xyz::1]/login');
+
+      expect(
+        result.signals.any(
+          (signal) => signal.type == UrlSignalType.ipAddressHost,
+        ),
+        isFalse,
       );
     });
 
@@ -153,6 +253,81 @@ void main() {
       expect(
         result.signals.any(
           (signal) => signal.type == UrlSignalType.urlShortener,
+        ),
+        isFalse,
+      );
+    });
+
+    test('detects Unicode internationalized hostname', () {
+      final result = analyzer.analyze('https://münich.example/login');
+
+      expect(result.host, isNotEmpty);
+      expect(result.domain, isNotNull);
+    });
+
+    test('detects mixed-script Unicode hostname', () {
+      final result = analyzer.analyze('https://раураl.example/login');
+
+      expect(
+        result.signals.any(
+          (signal) => signal.type == UrlSignalType.mixedScriptHost,
+        ),
+        isTrue,
+      );
+    });
+
+    test('does not flag a normal Unicode hostname as mixed-script', () {
+      final result = analyzer.analyze('https://münich.example/login');
+
+      expect(
+        result.signals.any(
+          (signal) => signal.type == UrlSignalType.mixedScriptHost,
+        ),
+        isFalse,
+      );
+    });
+
+    test('detects Greek and Latin mixed-script hostname', () {
+      final result = analyzer.analyze('https://paypaλ.example/login');
+
+      expect(
+        result.signals.any(
+          (signal) => signal.type == UrlSignalType.mixedScriptHost,
+        ),
+        isTrue,
+      );
+    });
+
+    test('Punycode hostname remains detectable', () {
+      final result = analyzer.analyze('https://xn--80ak6aa92e.com/login');
+
+      expect(
+        result.signals.any(
+          (signal) => signal.type == UrlSignalType.punycodeHost,
+        ),
+        isTrue,
+      );
+    });
+
+    test('does not flag mixed scripts found only in query parameters', () {
+      final result = analyzer.analyze(
+        'https://example.com?next=paypaλ.example',
+      );
+
+      expect(
+        result.signals.any(
+          (signal) => signal.type == UrlSignalType.mixedScriptHost,
+        ),
+        isFalse,
+      );
+    });
+
+    test('does not flag mixed scripts found only in URL fragments', () {
+      final result = analyzer.analyze('https://example.com#paypaλ.example');
+
+      expect(
+        result.signals.any(
+          (signal) => signal.type == UrlSignalType.mixedScriptHost,
         ),
         isFalse,
       );

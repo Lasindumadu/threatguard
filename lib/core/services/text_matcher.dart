@@ -32,7 +32,7 @@ class TextMatcher {
     final endsWithLetter = RegExp(r'\p{L}$', unicode: true).hasMatch(p);
     final plural = endsWithLetter ? '(?:e?s)?' : '';
     return RegExp(
-      '(?<![\\p{L}\\p{N}])$body$plural(?![\\p{L}\\p{N}])',
+      '(?<![\\p{L}\\p{N}\\p{M}])$body$plural(?![\\p{L}\\p{N}\\p{M}])',
       unicode: true,
     );
   }
