@@ -13,6 +13,7 @@ class MlTrainingDataset {
       final features = extractor.extract(
         caseId: evaluationCase.id,
         message: evaluationCase.message,
+        scenarioFamily: evaluationCase.scenarioFamily,
       );
 
       return MlTrainingExample(

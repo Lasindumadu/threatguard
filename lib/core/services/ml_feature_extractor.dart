@@ -36,7 +36,11 @@ class MlFeatureExtractor {
     'shipping',
   ];
 
-  MlFeatureVector extract({required String? message, String caseId = ''}) {
+  MlFeatureVector extract({
+    required String? message,
+    String caseId = '',
+    String? scenarioFamily,
+  }) {
     final bounded = TextPreprocessor.capTokenLength(
       TextPreprocessor.bound(message, maxLength: maxMessageLength).text,
     );
@@ -100,6 +104,7 @@ class MlFeatureExtractor {
 
     return MlFeatureVector(
       caseId: caseId,
+      scenarioFamily: scenarioFamily,
       // Length of the content the model actually saw.
       messageLength: bounded.replaceAll(' ', '').length,
       wordCount: _wordCount(bounded),

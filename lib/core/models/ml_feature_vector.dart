@@ -3,6 +3,12 @@ enum MlThreatType { legitimate, spam, phishing, scam, socialEngineering }
 class MlFeatureVector {
   final String caseId;
 
+  /// Scenario family this example belongs to, for group-aware splitting.
+  ///
+  /// `null` when the example is a unique singleton family. Populated by
+  /// [MlTrainingDataset] from [EvaluationCase.scenarioFamily].
+  final String? scenarioFamily;
+
   // Message-level features.
   final int messageLength;
   final int wordCount;
@@ -43,6 +49,7 @@ class MlFeatureVector {
 
   const MlFeatureVector({
     required this.caseId,
+    this.scenarioFamily,
     required this.messageLength,
     required this.wordCount,
     required this.urlCount,

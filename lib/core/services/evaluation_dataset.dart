@@ -2,6 +2,43 @@ import '../models/evaluation_case.dart';
 import '../models/threat_analysis.dart';
 
 class EvaluationDataset {
+  /// All evaluation cases, each with an optional [scenarioFamily] for
+  /// group-aware evaluation splitting.
+  ///
+  /// Scenario-family grouping rules (reviewable, explicit identifiers):
+  /// Cases that share a meaningful underlying template or scenario are given
+  /// the same family id so that a group-aware split keeps every member of a
+  /// family in the same fold — preventing near-duplicate templates from
+  /// appearing in both training and held-out evaluation.
+  ///
+  /// There are 20 distinct named scenario families containing 86 cases, plus
+  /// 19 null-family singleton cases, for 105 cases total.
+  ///
+  /// Families used:
+  ///   legit:appointment        legitimate_001, legitimate_004
+  ///   legit:delivery           legitimate_002, legitimate_007
+  ///   legit:security-review    legitimate_006, legitimate_020
+  ///   legit:statement          legitimate_011, legitimate_019, legitimate_021
+  ///   legit:maintenance        legitimate_012, legitimate_018, legitimate_023
+  ///   spam:offer-discount      spam_001, 004, 006, 009, 014, 016, 018
+  ///   spam:limited-time-subscribe spam_002, 007, 010, 012, 015
+  ///   spam:congratulations-selected-reward spam_003, 005, 008, 011, 013, 017, 019
+  ///   phishing:credential-verification-with-url  phishing_001..010
+  ///   phishing:credential-request-no-url         phishing_011..015
+  ///   scam:won-prize-fee       scam_001, 006, 009, 015
+  ///   scam:lottery-bank-details scam_002, 008
+  ///   scam:transfer-unlock-payment scam_004, 007, 010, 012
+  ///   scam:selected-reward-credit-card scam_005, 014
+  ///   scam:cash-reward-fee     scam_003, 011, 013, 016, 017, 018, 019
+  ///   se:bank-authority-credential social_001, 006, 011, 016, 020
+  ///   se:customer-support-credential social_002, 007, 012, 015, 019
+  ///   se:government-tax-account  social_003, 008, 014, 017, 021
+  ///   se:delivery-credential     social_004, 010, 013, 018
+  ///   se:security-officer-pin    social_005, 009
+  ///
+  /// Cases not listed above are unique singletons (scenarioFamily == null),
+  /// each treated as its own one-case family. A `null` family is intentional;
+  /// uncertain assignments are left null rather than guessed.
   static const List<EvaluationCase> cases = [
     // ============================================================
     // LEGITIMATE
@@ -13,6 +50,7 @@ class EvaluationDataset {
           'Hi, your meeting is scheduled for tomorrow at 10 AM. See you there.',
       expectedType: ThreatType.legitimate,
       expectedLevel: ThreatLevel.safe,
+      scenarioFamily: 'legit:appointment',
     ),
     EvaluationCase(
       id: 'legitimate_002',
@@ -20,6 +58,7 @@ class EvaluationDataset {
           'Your order has been shipped and will arrive tomorrow afternoon.',
       expectedType: ThreatType.legitimate,
       expectedLevel: ThreatLevel.safe,
+      scenarioFamily: 'legit:delivery',
     ),
     EvaluationCase(
       id: 'legitimate_003',
@@ -33,6 +72,7 @@ class EvaluationDataset {
       message: 'Please remember that your appointment is scheduled for Friday at 2 PM.',
       expectedType: ThreatType.legitimate,
       expectedLevel: ThreatLevel.safe,
+      scenarioFamily: 'legit:appointment',
     ),
     EvaluationCase(
       id: 'legitimate_005',
@@ -48,12 +88,14 @@ class EvaluationDataset {
           'Your account security review is complete. No action is required.',
       expectedType: ThreatType.legitimate,
       expectedLevel: ThreatLevel.safe,
+      scenarioFamily: 'legit:security-review',
     ),
     EvaluationCase(
       id: 'legitimate_007',
       message: 'The delivery company will contact you tomorrow regarding your package.',
       expectedType: ThreatType.legitimate,
       expectedLevel: ThreatLevel.safe,
+      scenarioFamily: 'legit:delivery',
     ),
     EvaluationCase(
       id: 'legitimate_008',
@@ -82,60 +124,70 @@ class EvaluationDataset {
       message: 'Special offer! Get 50% off selected products this weekend.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:offer-discount',
     ),
     EvaluationCase(
       id: 'spam_002',
       message: 'Limited time offer! Subscribe today and receive a free reward.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:limited-time-subscribe',
     ),
     EvaluationCase(
       id: 'spam_003',
       message: 'Congratulations! Our store has a special reward available for selected customers.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:congratulations-selected-reward',
     ),
     EvaluationCase(
       id: 'spam_004',
       message: 'Act now to receive our latest promotional discount before the offer expires today.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:offer-discount',
     ),
     EvaluationCase(
       id: 'spam_005',
       message: 'Free money and rewards are available for a limited number of customers.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:congratulations-selected-reward',
     ),
     EvaluationCase(
       id: 'spam_006',
       message: 'Exclusive discount available for selected customers this week.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:offer-discount',
     ),
     EvaluationCase(
       id: 'spam_007',
       message: 'Subscribe today and enjoy our latest promotional offer.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:limited-time-subscribe',
     ),
     EvaluationCase(
       id: 'spam_008',
       message: 'Special reward available for a limited number of customers.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:congratulations-selected-reward',
     ),
     EvaluationCase(
       id: 'spam_009',
       message: 'Get a special discount on selected products before the offer expires.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:offer-discount',
     ),
     EvaluationCase(
       id: 'spam_010',
       message: 'Limited time promotion: receive a free reward when you subscribe today.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:limited-time-subscribe',
     ),
 
     // ============================================================
@@ -146,60 +198,70 @@ class EvaluationDataset {
       message: 'URGENT! Your bank account will be suspended today. Verify your account immediately using https://example.com/login and enter your password and OTP.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'phishing:credential-verification-with-url',
     ),
     EvaluationCase(
       id: 'phishing_002',
       message: 'Your account has been locked due to unusual activity. Verify your identity using https://example.com and enter your security code.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'phishing:credential-verification-with-url',
     ),
     EvaluationCase(
       id: 'phishing_003',
       message: 'Security alert: your account will be closed unless you confirm your login details immediately.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'phishing:credential-verification-with-url',
     ),
     EvaluationCase(
       id: 'phishing_004',
       message: 'Your verification is required. Please provide your password and one-time password to restore access.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'phishing:credential-verification-with-url',
     ),
     EvaluationCase(
       id: 'phishing_005',
       message: 'Unusual activity was detected on your account. Login now at https://example.com to verify your identity.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'phishing:credential-verification-with-url',
     ),
     EvaluationCase(
       id: 'phishing_006',
       message: 'Your account will be closed today. Enter your password to keep your account active.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'phishing:credential-verification-with-url',
     ),
     EvaluationCase(
       id: 'phishing_007',
       message: 'Security alert. Please enter your verification code at https://example.com to restore access.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'phishing:credential-verification-with-url',
     ),
     EvaluationCase(
       id: 'phishing_008',
       message: 'Your account has been locked. Provide your login details to unlock it.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'phishing:credential-verification-with-url',
     ),
     EvaluationCase(
       id: 'phishing_009',
       message: 'Verify your account immediately by entering your PIN and security code.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'phishing:credential-verification-with-url',
     ),
     EvaluationCase(
       id: 'phishing_010',
       message: 'Your identity verification is required. Submit your password to complete verification.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'phishing:credential-verification-with-url',
     ),
 
     // ============================================================
@@ -210,60 +272,70 @@ class EvaluationDataset {
       message: 'Congratulations! You have won a \$5,000 cash prize. Claim your prize now by visiting https://example.com.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:won-prize-fee',
     ),
     EvaluationCase(
       id: 'scam_002',
       message: 'You have won the national lottery. Send your bank account number to receive your prize.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:lottery-bank-details',
     ),
     EvaluationCase(
       id: 'scam_003',
       message: 'Free money is waiting for you. Pay the processing fee now to claim your reward.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:cash-reward-fee',
     ),
     EvaluationCase(
       id: 'scam_004',
       message: 'Congratulations winner! Transfer money immediately to unlock your cash prize.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:transfer-unlock-payment',
     ),
     EvaluationCase(
       id: 'scam_005',
       message: 'You have been selected for a special reward. Provide your credit card details to receive the payment.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:selected-reward-credit-card',
     ),
     EvaluationCase(
       id: 'scam_006',
       message: 'You won a cash reward. Pay the processing fee to release your prize.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:won-prize-fee',
     ),
     EvaluationCase(
       id: 'scam_007',
       message: 'Congratulations winner! Send money now to receive your lottery payment.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:transfer-unlock-payment',
     ),
     EvaluationCase(
       id: 'scam_008',
       message: 'Free money is available. Provide your bank account number to receive the reward.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:lottery-bank-details',
     ),
     EvaluationCase(
       id: 'scam_009',
       message: 'You have been selected for a cash prize. Pay the required fee to claim it.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:won-prize-fee',
     ),
     EvaluationCase(
       id: 'scam_010',
       message: 'Lottery winner notification: transfer the required payment to unlock your prize.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:transfer-unlock-payment',
     ),
 
     // ============================================================
@@ -274,66 +346,77 @@ class EvaluationDataset {
       message: 'This is the bank security department. Do not tell anyone about this request. Act immediately and send your verification code.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:bank-authority-credential',
     ),
     EvaluationCase(
       id: 'social_002',
       message: 'This is customer support. Keep this confidential and send your security code immediately.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:customer-support-credential',
     ),
     EvaluationCase(
       id: 'social_003',
       message: 'The government department requires your account number immediately. Do not share this request with anyone.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:government-tax-account',
     ),
     EvaluationCase(
       id: 'social_004',
       message: 'Your delivery company needs your verification code right now to release the package.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'se:delivery-credential',
     ),
     EvaluationCase(
       id: 'social_005',
       message: 'A security officer needs your PIN immediately. Please keep this request confidential.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'se:security-officer-pin',
     ),
     EvaluationCase(
       id: 'social_006',
       message: 'This is the bank security team. Send your verification code immediately to prevent your account from being suspended.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:bank-authority-credential',
     ),
     EvaluationCase(
       id: 'social_007',
       message: 'Customer service requires your security code right now. Do not share this request with anyone.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:customer-support-credential',
     ),
     EvaluationCase(
       id: 'social_008',
       message: 'The tax department needs your account number immediately. Keep this request confidential.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:government-tax-account',
     ),
     EvaluationCase(
       id: 'social_009',
       message: 'A support officer needs your PIN right now to complete the account verification.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'se:security-officer-pin',
     ),
     EvaluationCase(
       id: 'social_010',
       message: 'The delivery company requires your verification code immediately to release your package.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'se:delivery-credential',
     ),
     EvaluationCase(
       id: 'legitimate_011',
       message: 'Your account statement is ready. You can view it through the official banking application.',
       expectedType: ThreatType.legitimate,
       expectedLevel: ThreatLevel.safe,
+      scenarioFamily: 'legit:statement',
     ),
 
     EvaluationCase(
@@ -341,6 +424,7 @@ class EvaluationDataset {
       message: 'Our IT team will perform scheduled maintenance tonight from 11 PM to 1 AM.',
       expectedType: ThreatType.legitimate,
       expectedLevel: ThreatLevel.safe,
+      scenarioFamily: 'legit:maintenance',
     ),
 
     EvaluationCase(
@@ -383,6 +467,7 @@ class EvaluationDataset {
       message: 'The office access system will be unavailable during scheduled maintenance.',
       expectedType: ThreatType.legitimate,
       expectedLevel: ThreatLevel.safe,
+      scenarioFamily: 'legit:maintenance',
     ),
 
     EvaluationCase(
@@ -390,6 +475,7 @@ class EvaluationDataset {
       message: 'Special offer available today. Get 30% off selected products.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:congratulations-selected-reward',
     ),
 
     EvaluationCase(
@@ -398,6 +484,7 @@ class EvaluationDataset {
           'Limited time offer! Subscribe today and receive a special reward.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:limited-time-subscribe',
     ),
 
     EvaluationCase(
@@ -405,6 +492,7 @@ class EvaluationDataset {
       message: 'Congratulations! You have been selected for our promotional campaign.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:congratulations-selected-reward',
     ),
 
     EvaluationCase(
@@ -412,6 +500,7 @@ class EvaluationDataset {
       message: 'Your account has been locked. Verify your identity to restore access.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'phishing:credential-request-no-url',
     ),
 
     EvaluationCase(
@@ -419,6 +508,7 @@ class EvaluationDataset {
       message: 'Security alert: unusual activity was detected. Enter your password to continue.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'phishing:credential-request-no-url',
     ),
 
     EvaluationCase(
@@ -426,6 +516,7 @@ class EvaluationDataset {
       message: 'Please enter your verification code to confirm your account immediately.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'phishing:credential-request-no-url',
     ),
 
     EvaluationCase(
@@ -433,6 +524,7 @@ class EvaluationDataset {
       message: 'Your account verification is required. Provide your login details to continue.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'phishing:credential-request-no-url',
     ),
 
     EvaluationCase(
@@ -440,6 +532,7 @@ class EvaluationDataset {
       message: 'Your security verification is incomplete. Enter your PIN to finish the process.',
       expectedType: ThreatType.phishing,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'phishing:credential-request-no-url',
     ),
 
     EvaluationCase(
@@ -447,6 +540,7 @@ class EvaluationDataset {
       message: 'You have been selected for a cash reward. Pay a small processing fee to receive it.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:cash-reward-fee',
     ),
 
     EvaluationCase(
@@ -454,6 +548,7 @@ class EvaluationDataset {
       message: 'Congratulations, your reward is ready. Send money to release the funds.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:transfer-unlock-payment',
     ),
 
     EvaluationCase(
@@ -461,6 +556,7 @@ class EvaluationDataset {
       message: 'Your prize is waiting. Transfer the required payment before collection.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:cash-reward-fee',
     ),
 
     EvaluationCase(
@@ -468,6 +564,7 @@ class EvaluationDataset {
       message: 'You were selected for a special cash reward. Pay the required fee to claim it.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:selected-reward-credit-card',
     ),
 
     EvaluationCase(
@@ -475,6 +572,7 @@ class EvaluationDataset {
       message: 'This is the bank security department. Send your verification code immediately.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:bank-authority-credential',
     ),
 
     EvaluationCase(
@@ -482,6 +580,7 @@ class EvaluationDataset {
       message: 'Customer support needs your security code right now to complete the account verification.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:customer-support-credential',
     ),
 
     EvaluationCase(
@@ -489,6 +588,7 @@ class EvaluationDataset {
       message: 'The delivery company requires your PIN immediately to release your package.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'se:delivery-credential',
     ),
 
     EvaluationCase(
@@ -496,6 +596,7 @@ class EvaluationDataset {
       message: 'The tax department needs your account number immediately. Keep this request confidential.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:government-tax-account',
     ),
 
     EvaluationCase(
@@ -503,6 +604,7 @@ class EvaluationDataset {
       message: 'A support officer needs your verification code right now to complete your account verification.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:customer-support-credential',
     ),
 
     // ============================================================
@@ -517,6 +619,7 @@ class EvaluationDataset {
       message: 'Your bank account statement is now available. Please review it through the official banking application.',
       expectedType: ThreatType.legitimate,
       expectedLevel: ThreatLevel.safe,
+      scenarioFamily: 'legit:statement',
     ),
 
     EvaluationCase(
@@ -524,6 +627,7 @@ class EvaluationDataset {
       message: 'The security team completed the scheduled review of your account. No action is required.',
       expectedType: ThreatType.legitimate,
       expectedLevel: ThreatLevel.safe,
+      scenarioFamily: 'legit:security-review',
     ),
 
     EvaluationCase(
@@ -531,6 +635,7 @@ class EvaluationDataset {
       message: 'Please visit https://example.com/account to view your latest account statement.',
       expectedType: ThreatType.legitimate,
       expectedLevel: ThreatLevel.safe,
+      scenarioFamily: 'legit:statement',
     ),
 
     EvaluationCase(
@@ -545,6 +650,7 @@ class EvaluationDataset {
       message: 'The IT department will perform routine security maintenance on the account system tonight.',
       expectedType: ThreatType.legitimate,
       expectedLevel: ThreatLevel.safe,
+      scenarioFamily: 'legit:maintenance',
     ),
 
     EvaluationCase(
@@ -562,6 +668,7 @@ class EvaluationDataset {
       message: 'Weekend promotion! Get 40% off selected products while the special offer lasts.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:offer-discount',
     ),
 
     EvaluationCase(
@@ -569,6 +676,7 @@ class EvaluationDataset {
       message: 'Subscribe today and receive an exclusive promotional reward from our store.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:limited-time-subscribe',
     ),
 
     EvaluationCase(
@@ -576,6 +684,7 @@ class EvaluationDataset {
       message: 'Limited time discount available now for selected customers. Shop today.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:offer-discount',
     ),
 
     EvaluationCase(
@@ -583,6 +692,7 @@ class EvaluationDataset {
       message: 'Special promotion! Receive a free reward when you join our customer program.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:congratulations-selected-reward',
     ),
 
     EvaluationCase(
@@ -590,6 +700,7 @@ class EvaluationDataset {
       message: 'Exclusive offer available this week. Enjoy a special discount on selected products.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:offer-discount',
     ),
 
     EvaluationCase(
@@ -597,6 +708,7 @@ class EvaluationDataset {
       message: 'Congratulations! You have been selected for a special promotional reward from our store.',
       expectedType: ThreatType.spam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'spam:congratulations-selected-reward',
     ),
 
     // ============================================================
@@ -659,6 +771,7 @@ class EvaluationDataset {
       message: 'You have won a cash reward. Pay the required processing fee before the prize can be released.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:won-prize-fee',
     ),
 
     EvaluationCase(
@@ -666,6 +779,7 @@ class EvaluationDataset {
       message: 'Your lottery prize is ready. Transfer the required payment to receive the funds.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:cash-reward-fee',
     ),
 
     EvaluationCase(
@@ -673,6 +787,7 @@ class EvaluationDataset {
       message: 'Congratulations! A cash prize has been reserved for you. Provide your bank account number to receive it.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:cash-reward-fee',
     ),
 
     EvaluationCase(
@@ -680,6 +795,7 @@ class EvaluationDataset {
       message: 'You were selected for a special reward. Pay the small release fee before collecting your prize.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:cash-reward-fee',
     ),
 
     EvaluationCase(
@@ -687,6 +803,7 @@ class EvaluationDataset {
       message: 'A cash reward is waiting for you. Transfer money now to complete the prize collection.',
       expectedType: ThreatType.scam,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'scam:cash-reward-fee',
     ),
 
     // Scam with a URL signal rather than relying only on prize wording.
@@ -705,6 +822,7 @@ class EvaluationDataset {
       message: 'This is the bank security team. Send your verification code immediately so we can secure your account.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:bank-authority-credential',
     ),
 
     EvaluationCase(
@@ -712,6 +830,7 @@ class EvaluationDataset {
       message: 'The government security office requires your account number immediately. Keep this request confidential.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:government-tax-account',
     ),
 
     EvaluationCase(
@@ -719,6 +838,7 @@ class EvaluationDataset {
       message: 'Your delivery service needs your PIN right now to complete the package release.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.suspicious,
+      scenarioFamily: 'se:delivery-credential',
     ),
 
     EvaluationCase(
@@ -726,6 +846,7 @@ class EvaluationDataset {
       message: 'Customer support needs your verification code immediately to finish your account verification.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:customer-support-credential',
     ),
 
     // Social engineering with a suspicious URL.
@@ -734,6 +855,7 @@ class EvaluationDataset {
       message: 'This is the bank security department. Verify your account immediately at https://bit.ly/security-check and send your verification code.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:bank-authority-credential',
     ),
 
     // Social engineering using an authority + credential pattern.
@@ -742,6 +864,7 @@ class EvaluationDataset {
       message: 'The tax department requires your security code now to complete your account verification. Do not share this request.',
       expectedType: ThreatType.socialEngineering,
       expectedLevel: ThreatLevel.highRisk,
+      scenarioFamily: 'se:government-tax-account',
     ),
   ];
 }
