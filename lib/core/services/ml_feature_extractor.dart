@@ -1,64 +1,74 @@
 import '../models/ml_feature_vector.dart';
-import '../models/threat_signal.dart';
 import '../models/url_analysis.dart';
-import 'threat_rule_catalog.dart';
-import 'url_analyzer.dart';
+import 'signal_features.dart';
 import 'text_matcher.dart';
+import 'text_preprocessor.dart';
+import 'url_analyzer.dart';
+import 'url_extractor.dart';
+
+/// Turns a message into the boolean/integer vector the classifier consumes.
+///
+/// Every signal here comes from the same [SignalFeatures] value and the same
+/// [UrlExtractor] the rule engine uses. A feature can therefore never describe
+/// a different message than the rules did — the previous implementation had
+/// already drifted, missing `send otp` and `send pin` entirely.
 
 class MlFeatureExtractor {
   final UrlAnalyzer urlAnalyzer;
 
   const MlFeatureExtractor({this.urlAnalyzer = const UrlAnalyzer()});
 
-  MlFeatureVector extract({required String message, String caseId = ''}) {
-    final text = message.trim().toLowerCase();
+  /// Upper bound matching `ThreatAnalyzer.maxMessageLength`. Both defer to
+  /// [TextPreprocessor.maxLength], so the rules and the model can never read
+  /// different amounts of the same message.
+  static const int maxMessageLength = TextPreprocessor.maxLength;
 
-    final urls = _extractUrls(text);
-    final urlAnalyses = urlAnalyzer.analyzeAll(urls);
+  /// Parcel vocabulary. Not a threat category — it separates "your parcel needs
+  /// a fee" from a genuine delivery notice.
+  static const List<String> _deliveryWords = [
+    'delivery',
+    'delivery service',
+    'delivery company',
+    'package',
+    'parcel',
+    'shipment',
+    'courier',
+    'shipping',
+  ];
 
-    final hasUrgency = _hasCategory(text, ThreatSignalCategory.urgency);
-
-    final hasAccountSecurity = _hasCategory(
-      text,
-      ThreatSignalCategory.accountSecurity,
+  MlFeatureVector extract({required String? message, String caseId = ''}) {
+    final bounded = TextPreprocessor.capTokenLength(
+      TextPreprocessor.bound(message, maxLength: maxMessageLength).text,
     );
 
-    final hasCredential = _hasCategory(text, ThreatSignalCategory.credential);
+    final urls = UrlExtractor.extract(bounded);
+    final urlAnalyses = urlAnalyzer.analyzeAll(urls);
 
-    final hasFinancial = _hasCategory(text, ThreatSignalCategory.financial);
-
-    final hasPrizeReward = _hasCategory(text, ThreatSignalCategory.prizeReward);
-
-    final hasSecrecy = _hasCategory(text, ThreatSignalCategory.secrecy);
-
-    final hasAuthority = _hasCategory(text, ThreatSignalCategory.authority);
-
-    final hasPromotion = _hasCategory(text, ThreatSignalCategory.promotion);
+    // The same folded form the rule engine scans. It used to extract from the
+    // raw text, so an obfuscated message looked different to the model and to
+    // the rules — the exact drift this file was written to prevent.
+    final scan = TextPreprocessor.matchingForm(bounded);
+    final features = SignalFeatures.extract(scan);
 
     final hasUrl = urls.isNotEmpty;
 
     final hasIpUrl = _hasUrlSignal(urlAnalyses, UrlSignalType.ipAddressHost);
-
     final hasPunycodeUrl = _hasUrlSignal(
       urlAnalyses,
       UrlSignalType.punycodeHost,
     );
-
     final hasEmbeddedCredentialsUrl = _hasUrlSignal(
       urlAnalyses,
       UrlSignalType.embeddedCredentials,
     );
-
     final hasNonStandardPortUrl = _hasUrlSignal(
       urlAnalyses,
       UrlSignalType.nonStandardPort,
     );
-
     final hasExcessiveSubdomainsUrl = _hasUrlSignal(
       urlAnalyses,
       UrlSignalType.excessiveSubdomains,
     );
-
     final hasShortenerUrl = _hasUrlSignal(
       urlAnalyses,
       UrlSignalType.urlShortener,
@@ -72,143 +82,37 @@ class MlFeatureExtractor {
         hasExcessiveSubdomainsUrl ||
         hasShortenerUrl;
 
-    final hasDeliveryContext = _containsAny(text, [
-      'delivery',
-      'delivery service',
-      'delivery company',
-      'package',
-      'parcel',
-      'shipment',
-      'courier',
-      'shipping',
-    ]);
+    final hasCredentialRequest = features.hasCredentialRequest;
 
-    final hasAccountVerification = _containsAny(text, [
-      'verify your account',
-      'verify account',
-      'account verification',
-      'confirm your account',
-      'confirm account',
-      'confirm your account details',
-      'security verification',
-    ]);
-
-    final hasIdentityVerification = _containsAny(text, [
-      'verify your identity',
-      'confirm your identity',
-      'identity verification',
-    ]);
-
-    final hasCredentialRequest = _containsAny(text, [
-      'send your password',
-      'provide your password',
-      'enter your password',
-      'share your password',
-      'submit your password',
-      'confirm your password',
-      'need your password',
-      'needs your password',
-      'require your password',
-      'requires your password',
-      'send your otp',
-      'provide your otp',
-      'enter your otp',
-      'share your otp',
-      'submit your otp',
-      'confirm your otp',
-      'need your otp',
-      'needs your otp',
-      'require your otp',
-      'requires your otp',
-      'send your verification code',
-      'provide your verification code',
-      'enter your verification code',
-      'share your verification code',
-      'submit your verification code',
-      'confirm your verification code',
-      'need your verification code',
-      'needs your verification code',
-      'require your verification code',
-      'requires your verification code',
-      'send your security code',
-      'provide your security code',
-      'enter your security code',
-      'share your security code',
-      'submit your security code',
-      'confirm your security code',
-      'need your security code',
-      'needs your security code',
-      'require your security code',
-      'requires your security code',
-      'send your pin',
-      'provide your pin',
-      'enter your pin',
-      'share your pin',
-      'submit your pin',
-      'confirm your pin',
-      'need your pin',
-      'needs your pin',
-      'require your pin',
-      'requires your pin',
-    ]);
-
-    final hasStrongCredentialRequest = _containsAny(text, [
-      'send your otp',
-      'provide your otp',
-      'enter your otp',
-      'share your otp',
-      'submit your otp',
-      'confirm your otp',
-      'need your otp',
-      'needs your otp',
-      'require your otp',
-      'requires your otp',
-      'send your verification code',
-      'provide your verification code',
-      'enter your verification code',
-      'share your verification code',
-      'submit your verification code',
-      'confirm your verification code',
-      'need your verification code',
-      'needs your verification code',
-      'require your verification code',
-      'requires your verification code',
-      'send your security code',
-      'provide your security code',
-      'enter your security code',
-      'share your security code',
-      'submit your security code',
-      'confirm your security code',
-      'need your security code',
-      'needs your security code',
-      'require your security code',
-      'requires your security code',
-    ]);
-
-    final hasPrizeFinancialCombination = hasPrizeReward && hasFinancial;
+    final hasPrizeFinancialCombination =
+        features.hasPrizePattern && features.hasFinancialRequest;
 
     final hasAccountCredentialCombination =
-        (hasAccountSecurity || hasAccountVerification) && hasCredentialRequest;
+        (features.hasAccountThreat ||
+            features.hasAccountVerificationLanguage) &&
+        hasCredentialRequest;
 
     final hasAuthorityCredentialCombination =
-        hasAuthority && hasCredentialRequest;
+        features.hasAuthorityReference && hasCredentialRequest;
 
-    final hasUrgencyCredentialCombination = hasUrgency && hasCredentialRequest;
+    final hasUrgencyCredentialCombination =
+        features.hasUrgency && hasCredentialRequest;
 
     return MlFeatureVector(
       caseId: caseId,
-      messageLength: text.length,
-      wordCount: _wordCount(text),
+      // Length of the content the model actually saw.
+      messageLength: bounded.replaceAll(' ', '').length,
+      wordCount: _wordCount(bounded),
       urlCount: urls.length,
-      hasUrgency: hasUrgency,
-      hasAccountSecurity: hasAccountSecurity,
-      hasCredential: hasCredential,
-      hasFinancial: hasFinancial,
-      hasPrizeReward: hasPrizeReward,
-      hasSecrecy: hasSecrecy,
-      hasAuthority: hasAuthority,
-      hasPromotion: hasPromotion,
-      hasDeliveryContext: hasDeliveryContext,
+      hasUrgency: features.hasUrgency,
+      hasAccountSecurity: features.hasAccountThreat,
+      hasCredential: features.hasCredentialSignal,
+      hasFinancial: features.hasFinancialRequest,
+      hasPrizeReward: features.hasPrizePattern,
+      hasSecrecy: features.hasSecrecyPressure,
+      hasAuthority: features.hasAuthorityReference,
+      hasPromotion: features.hasPromotionalLanguage,
+      hasDeliveryContext: TextMatcher.containsAny(scan, _deliveryWords),
       hasUrl: hasUrl,
       hasSuspiciousUrl: hasSuspiciousUrl,
       hasIpUrl: hasIpUrl,
@@ -217,21 +121,15 @@ class MlFeatureExtractor {
       hasNonStandardPortUrl: hasNonStandardPortUrl,
       hasExcessiveSubdomainsUrl: hasExcessiveSubdomainsUrl,
       hasShortenerUrl: hasShortenerUrl,
-      hasAccountVerification: hasAccountVerification,
-      hasIdentityVerification: hasIdentityVerification,
+      hasAccountVerification: features.hasAccountVerificationLanguage,
+      hasIdentityVerification: features.hasIdentityVerificationLanguage,
       hasCredentialRequest: hasCredentialRequest,
-      hasStrongCredentialRequest: hasStrongCredentialRequest,
+      hasStrongCredentialRequest: features.hasStrongCredentialRequest,
       hasPrizeFinancialCombination: hasPrizeFinancialCombination,
       hasAccountCredentialCombination: hasAccountCredentialCombination,
       hasAuthorityCredentialCombination: hasAuthorityCredentialCombination,
       hasUrgencyCredentialCombination: hasUrgencyCredentialCombination,
     );
-  }
-
-  bool _hasCategory(String text, ThreatSignalCategory category) {
-    return ThreatRuleCatalog.rules
-        .where((rule) => rule.category == category)
-        .any((rule) => TextMatcher.containsAny(text, rule.patterns));
   }
 
   bool _hasUrlSignal(List<UrlAnalysis> analyses, UrlSignalType type) {
@@ -240,29 +138,8 @@ class MlFeatureExtractor {
     );
   }
 
-  bool _containsAny(String text, List<String> patterns) {
-    return TextMatcher.containsAny(text, patterns);
-  }
-
   int _wordCount(String text) {
-    if (text.isEmpty) {
-      return 0;
-    }
-
-    return text.split(RegExp(r'\s+')).length;
-  }
-
-  List<String> _extractUrls(String text) {
-    final urlPattern = RegExp(r'(https?://|www\.)[^\s]+', caseSensitive: false);
-
-    return urlPattern
-        .allMatches(text)
-        .map((match) => match.group(0)!)
-        .map(_cleanUrl)
-        .toList();
-  }
-
-  String _cleanUrl(String url) {
-    return url.replaceAll(RegExp(r'[.,!?;:]+$'), '');
-  }
-}
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return 0;
+    return trimmed.split(RegExp(r'\s+')).length;
+  }}

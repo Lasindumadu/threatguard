@@ -1,0 +1,89 @@
+# THREATGUARD PHASE 1 — CORE ARCHITECTURE, DETECTION ENGINE AND RELIABILITY
+
+You are working on my existing Flutter cybersecurity application, ThreatGuard. Your job is to improve the real project in place, not create a replacement.
+
+## Product direction
+
+ThreatGuard is evolving from a phishing/spam/message classifier into an integrated personal cybersecurity application. It should eventually help users investigate suspicious messages, links, phone numbers and files, understand their digital risk, and take safe actions.
+
+The existing app may already include:
+- Rule-based and machine-learning detection
+- Phishing, spam, social-engineering and legitimate classifications
+- URL forensics and an organization registry
+- Analysis history, threat explanations, advisories and model insights
+- Five-tab navigation and light/dark themes
+- Channel toggles for SMS, WhatsApp, Messenger, Instagram, email, web, clipboard, manual and shared content
+- Clipboard-watch settings
+- Local persistence, multilingual support and automated tests
+
+Treat this list as context, not proof. Inspect the current repository to determine what actually exists.
+
+## Task 1 — Establish a baseline
+
+1. Identify the project root, Flutter/Dart versions, dependencies and entry points.
+2. Inspect architecture, dependency injection, navigation, persistence, analyzer, ML model, rules, URL scanner, organization registry, channel filtering, clipboard service and tests.
+3. Run the existing relevant tests and static analysis before modifying code.
+4. Record current failures and known limitations.
+5. Create or update a technical roadmap document with verified findings only.
+
+Do not overwrite existing documentation without preserving relevant information.
+
+## Task 2 — Improve detection architecture
+
+- Preserve the current hybrid analysis engine.
+- Identify duplicate or contradictory rules and overlapping feature calculations.
+- Ensure text normalization, URL extraction, scoring, evidence generation and verdict mapping use shared implementations.
+- Keep rule-based and ML results distinguishable and explainable.
+- Prevent duplicate evidence from being counted multiple times without justification.
+- Use a consistent analysis result containing, where appropriate, verdict, risk score, confidence or uncertainty, detected categories, matched evidence, reasons, source and recommended actions.
+- Do not confuse a numeric risk score with a statistically calibrated probability.
+- Do not mark an item as verified malicious merely because it looks suspicious.
+
+## Task 3 — Protection settings and channels
+
+Verify the implementation of Strict/Protection mode, channel toggles, clipboard monitoring, offline behavior and relevant settings.
+
+- Make settings effective across every relevant analysis entry point.
+- Preserve a single source of truth for settings.
+- Persist settings safely and apply changes immediately where appropriate.
+- Ensure disabled channels are not processed by automatic channel-monitoring workflows.
+- Do not silently disable manual analysis if the intended product permits users to analyze content manually.
+- Prevent clipboard monitoring from repeatedly processing the same content or creating endless notifications.
+- Respect lifecycle transitions, user consent and background-execution limitations.
+- Never add SMS, accessibility or other sensitive permissions without a documented requirement and explicit policy review.
+
+## Task 4 — Improve verdict quality
+
+- Separate benign, suspicious, high-risk and confirmed-threat concepts appropriately within the existing taxonomy.
+- Make verdict thresholds and uncertainty handling consistent.
+- Ensure legitimate bank alerts, delivery updates, job information and security education are not marked dangerous merely because they contain sensitive keywords.
+- Include the actual evidence responsible for a result.
+- Explain what is known, what is inferred and what remains unknown.
+- Avoid unsupported claims about sender identity or domain ownership.
+
+## Task 5 — Reliability and maintainability
+
+- Review exceptions, malformed input, empty content, very long messages, invalid URLs, Unicode handling and null values.
+- Ensure analysis failures return safe, understandable outcomes rather than crashing the UI.
+- Preserve existing history and settings compatibility.
+- Add or improve tests for regression-prone behavior.
+- Avoid large refactors unless essential to correctness.
+
+## Strict constraints
+
+- No rebuilding, architecture replacement or unrelated redesign.
+- Do not upgrade Flutter/Dart or dependencies without a demonstrated blocker.
+- Do not change app identity, version, signing configuration or release credentials.
+- Do not introduce paid APIs or a backend in this phase.
+- Do not weaken security tests or delete failing tests to get a green build.
+- Do not fabricate results or claim a command passed without running it.
+
+## Verification
+
+Run baseline and relevant regression tests, full tests where practical, static analysis and a web release build if supported.
+
+Inspect the final diff and report actual outcomes.
+
+## Final report
+
+Provide verified architecture findings, baseline failures, files changed, behavior improved, tests and exact command results, unresolved issues, any risks, and the recommended next phase. Stop after Phase 1.

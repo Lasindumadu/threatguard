@@ -18,4 +18,15 @@ class SenderAnalysis {
     required this.verificationStatus,
     required this.confidence,
   });
+
+  /// Used when no sender analysis was performed because the message was not
+  /// analysed. Confidence is 0, not 1: nothing was established.
+  static const SenderAnalysis unavailable = SenderAnalysis(
+    rawSender: '',
+    normalizedSender: '',
+    senderType: SenderType.unknown,
+    organization: null,
+    verificationStatus: SenderVerificationStatus.unknown,
+    confidence: 0.0,
+  );
 }

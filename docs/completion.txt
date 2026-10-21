@@ -1,0 +1,26 @@
+The audit is complete. docs/PHASE_1_1_AUDIT.md was created; no application code, tests, dependencies or configuration were changed.
+
+What I verified
+Environment: Flutter 3.47.4 / Dart 3.13.3, project root C:\Users\Admin\Desktop\APss\cyber\threatguard, 102 library files, 51 test files, no extra dependencies beyond shared_preferences, crypto, http, flutter_lints.
+
+Commands that actually ran
+
+Command	Result
+flutter analyze	No issues found (exit 0)
+flutter test test/phase1_regression_test.dart	41/41 pass
+flutter test (whole suite)	411 pass, 3 fail, 1 skipped (+411 -3 ~1)
+Targeted suites (model, channels, app services, widget, LR eval, splitter, evaluator)	all pass
+The 3 failures are stale metric floors in the hybrid/ML diagnostics, all rooted in 2 held-out model errors instead of 1 and one rule-engine type error (social_018): ruleCorrect >= 35 → 34, finalCorrectCount == 35 → 34, errorCount == 1 → 2. They were not touched.
+
+Key findings
+
+AppServices._build() — the path main.dart uses — trains on all 105 cases, while Model Insights reports "held-out" metrics from a model trained on only 70. The live model has seen its own test fold.
+Online lookup is gated correctly at call time, but AppServices only ever registers UnavailableOnlineUrlReputationProvider, so opting in can never reach the network.
+LocalStore.enabledChannels converts a stored empty list back into "all channels" — "monitor nothing" doesn't survive restart (the snapshot model disagrees).
+falsePositiveRate actually computes missed-legitimate rate, and threatPrecision pools all threat classes; docs quote both as if narrower.
+ProtectionMode.mlDowngradeThreshold is mode-aware but has no reader.
+docs/AUDIT.md has two contradictory metric tables, a stale "strict mode is inert" claim, and a "365 tests pass" claim that is now false. README's structure section is incomplete.
+One correction to the brief: the phase1_regression_test.dart on disk differs from the pasted version — it uses ThreatRuleCatalog.rules (the ThreatRuleIds class does not exist), uses a real ThreatMessage, and its trailing helper section is missing, so the three helper-dependent tests could never have compiled. The on-disk 41-test version is the one that ran and passed.
+
+The document ends with a recommended Task 1.2 (restore a trustworthy baseline), ordered to resolve the model-instance question before touching the failing floors. I stopped there as instructed.
+

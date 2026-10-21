@@ -1,0 +1,146 @@
+# THREATGUARD PHASE 8 — FINAL SECURITY AUDIT, PLATFORM VALIDATION AND RELEASE READINESS
+
+Continue the existing ThreatGuard project. This is a verification and remediation phase, not a redesign.
+
+## Objective
+
+Determine whether the current app is genuinely ready for a controlled release, identify blockers, fix safe and well-scoped defects, and produce accurate release documentation.
+
+Do not label the app release-ready until the actual checks support that conclusion.
+
+## Task 1 — Full regression audit
+
+Run:
+- Flutter/Dart static analysis
+- Complete unit and widget test suites
+- Integration tests where available
+- Web release build if supported
+- Android debug/release builds where the Android toolchain is installed
+- Dependency and configuration review
+- Review of generated build artifacts and final diff
+
+Record exact commands and actual results. Separate warnings from errors. Do not silently ignore existing failures.
+
+## Task 2 — Android permissions and platform behavior
+
+Inspect the Android manifest, runtime permission requests, app lifecycle and background services.
+
+Review:
+- SMS permissions and Google Play restrictions
+- Clipboard monitoring and lifecycle behavior
+- Share-sheet intents
+- Notification permissions and behavior
+- File picker and scoped storage
+- Network access and cleartext traffic
+- Background work restrictions
+- App links and URL handling
+- Deep links and exported activities
+- Permission denial and revocation
+- Cold-start and resume behavior
+
+Do not add broad permissions simply because they might make a feature easier to implement.
+
+Before any Play Store submission, verify current Google Play policy requirements for sensitive SMS permissions and the app's intended functionality. Do not assume the app qualifies for an exception. If direct inbox reading is not permitted for the intended distribution, document alternatives such as user-initiated sharing or supported manual import. Do not remove working functionality without explaining the trade-off.
+
+## Task 3 — Local data and privacy
+
+Audit local persistence for:
+- Settings and migrations
+- Analysis history
+- Feedback and exported datasets
+- Muted senders and enabled channels
+- Clipboard-derived data
+- API credentials or tokens
+- Logs and diagnostic output
+- Sensitive content deletion and retention
+
+Ensure no credentials or secrets are embedded in the client bundle. Avoid storing plaintext passwords or OTPs. Add clear deletion controls where appropriate.
+
+If encryption is proposed, verify the actual threat model and platform support rather than adding cosmetic encryption that provides no meaningful protection.
+
+## Task 4 — Network and provider security
+
+For every external service:
+- Verify provider URL, API version, authentication method and current terms
+- Set reasonable timeouts and response-size limits
+- Handle malformed responses, rate limits and outages
+- Avoid leaking unnecessary message contents or personal information
+- Keep secret credentials out of the Flutter client
+- Validate redirects and destination hosts
+- Use secure transport
+- Distinguish provider failure from a clean reputation result
+- Document whether any server-side component is required
+
+Do not claim a feature uses live threat intelligence if it only uses mock data or a local list.
+
+## Task 5 — Security and input testing
+
+Add or run tests for:
+- Malformed and oversized messages
+- Malformed URLs and redirect abuse
+- Unsafe external content
+- Storage failures
+- Import/export privacy
+- Invalid provider responses
+- Unicode and localization regressions
+- Offline operation
+- Duplicate clipboard events
+- Permission denial
+- App restart and lifecycle transitions
+- Existing detection false positives and false negatives
+
+Do not execute malware, visit live malicious sites or contact real victims during testing.
+
+## Task 6 — Performance and accessibility
+
+Verify where practical:
+- Startup time and memory behavior
+- Large history lists
+- Repeated scanning and caching
+- Animation cost
+- Small-screen layouts and text scaling
+- Keyboard navigation on web
+- Screen-reader labels
+- Light/dark themes
+- Offline and low-connectivity states
+
+Record measurements where tools are available. Do not invent performance figures.
+
+## Task 7 — Release packaging and documentation
+
+Inspect the current version, package identity, signing configuration, README, privacy policy, release notes and screenshots.
+
+- Preserve the current version unless a version change is explicitly authorized.
+- Never print, upload or commit private signing keys or credentials.
+- Do not overwrite release signing configuration.
+- Verify that documented features match actual implementation.
+- Document permissions and their purposes.
+- Clearly disclose any external data sharing.
+- Provide accurate setup and build instructions.
+- Remove development-only mock claims from production-facing documentation, while preserving useful development fixtures.
+- Check for personal file paths, secrets, unrelated files and stale URLs.
+- Do not create a false claim of independent certification or real-world detection accuracy.
+
+If the environment cannot build or sign Android artifacts, report that limitation and provide the exact remaining command or prerequisite. Do not claim a successful APK or AAB was generated unless the artifact exists and was verified.
+
+## Final release decision
+
+Report one of:
+- BLOCKED
+- READY FOR FURTHER DEVICE TESTING
+- READY FOR CONTROLLED RELEASE
+- READY FOR SUBMISSION REVIEW
+
+Choose the status supported by evidence.
+
+Provide:
+1. Test and build summary.
+2. Remaining release blockers.
+3. Android and Play Store policy concerns.
+4. Privacy and security findings.
+5. Exact artifacts actually produced.
+6. Files changed and final diff review.
+7. Manual tests still required on a real Android device.
+8. Recommended next steps.
+
+Do not claim Google Play approval or real-world protection effectiveness. Stop after the audit and report.

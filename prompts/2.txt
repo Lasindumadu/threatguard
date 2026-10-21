@@ -1,0 +1,127 @@
+# THREATGUARD PHASE 2 — DATASET EXPANSION, MODEL QUALITY AND EVALUATION INTEGRITY
+
+Continue the existing ThreatGuard project after Phase 1. Preserve its architecture and existing tests.
+
+## Main goal
+
+Improve detection quality through better data, representative examples, meaningful features, controlled evaluation and transparent error analysis. Do not optimize the system to perform well only on the messages its developer wrote.
+
+## Task 1 — Audit all datasets
+
+Find the current training, validation, test, diagnostic, hand-written and synthetic datasets.
+
+For each dataset, document:
+- Purpose and provenance
+- Number of examples per label and subtype
+- Languages and message lengths represented
+- Duplicate and near-duplicate examples
+- Label definitions and ambiguous cases
+- Whether examples are used for training, tuning or final evaluation
+- Known weaknesses and coverage gaps
+
+Do not assume synthetic examples are real-world evidence.
+
+## Task 2 — Create a structured threat taxonomy
+
+Retain compatibility with the existing top-level verdicts while supporting more detailed subtypes where appropriate:
+
+- Phishing and credential theft
+- OTP/PIN and account-recovery manipulation
+- Financial and payment scams
+- Delivery, customs and redelivery scams
+- Employment and recruitment-fee scams
+- Investment and guaranteed-return scams
+- Prize, refund, lottery and advance-fee scams
+- Impersonation and social engineering
+- Tech-support and remote-access scams
+- Fake invoices and payment-detail changes
+- Subscription and fake-billing scams
+- Romance and emotional manipulation
+- Malicious links and suspicious attachments
+- Benign notifications and legitimate marketing
+- Spam and unwanted promotion
+- Uncertain or insufficient-evidence cases
+
+Define labels consistently. Do not force ambiguous content into a definitive malicious class.
+
+## Task 3 — Build an expanded synthetic corpus
+
+Create a reproducible, version-controlled corpus with:
+- Multiple message structures for each category
+- Hard negatives that contain suspicious keywords in legitimate contexts
+- Short, long, formal, informal and misspelled examples
+- URL and non-URL variants
+- Brand impersonation and legitimate brand references
+- Relevant English, Sinhala and Tamil examples where supported by accurate linguistic knowledge
+- Mixed-language examples and Unicode edge cases
+- Obfuscation, unusual spacing and punctuation
+- False urgency, secrecy, authority and emotional pressure
+- Ambiguous cases that should receive a cautious verdict
+
+Avoid mechanically generated duplicates that inflate test volume without increasing diversity. Clearly label generated content as synthetic. Use reserved `.invalid` domains and fictitious entities when possible.
+
+Do not fabricate real victims, real personal details or real-world incident provenance.
+
+## Task 4 — Prevent data leakage
+
+Establish or preserve separate training, validation and final test sets.
+
+- Group related message variants, templates, campaigns and near-duplicates so they cannot leak across splits.
+- Use deterministic splitting and recorded seeds.
+- Fit preprocessing and learned parameters using training data only.
+- Tune thresholds on validation data only.
+- Reserve the final test set for final evaluation.
+- Keep the synthetic challenge corpus separate from the main benchmark.
+- Never train on the final test cases or tune rules to memorize their wording.
+- Add tests or validation checks that detect accidental overlap.
+
+## Task 5 — Improve model and rule features
+
+Inspect the current model and feature extraction before changing them.
+
+Potential improvements include:
+- Better context-aware feature extraction
+- Reliable URL and domain features
+- Requests for credentials, codes, payments or remote access
+- Combinations of pressure tactics and suspicious actions
+- Sender/context mismatch indicators
+- Distinguishing mentions from actual requests
+- Duplicate-indicator prevention
+- Calibration and uncertainty handling, if the existing model supports it
+
+Compare changes against a fixed baseline. Prefer a simpler model that performs consistently and can be explained over a complex model that cannot be validated.
+
+Do not introduce a large ML dependency, paid service or network backend without justification.
+
+## Task 6 — Evaluation and error analysis
+
+Report:
+- Dataset sizes and class distributions
+- Confusion matrix
+- Precision, recall and F1 by class
+- Macro and weighted metrics where appropriate
+- False-positive rate on legitimate examples
+- False-negative patterns
+- Performance by language and category where sample sizes support meaningful interpretation
+- Results for existing benchmarks and synthetic challenge sets separately
+- Confidence calibration metrics only if the probabilities are meaningful
+- Representative failure cases with explanations
+
+Never use accuracy alone. A tiny test set must not be described as proof of production accuracy.
+
+## Task 7 — Regression safeguards
+
+Add tests to protect:
+- Legitimate messages containing sensitive keywords
+- Existing high-value threat examples
+- Label and subtype compatibility
+- Stable reproducibility
+- No training/test leakage
+- Unicode and URL extraction behavior
+- Existing channel settings and analysis history
+
+Do not change ground-truth labels just to improve results.
+
+## Final report
+
+Include before/after results on identical held-out data, the exact datasets and split method, changes to model/rules, failures, files changed and commands executed. Explicitly distinguish synthetic performance from real-world performance. Stop after Phase 2.

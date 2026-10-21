@@ -1,436 +1,467 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import '../../../../core/models/organization_url_check.dart';
-import '../../../../core/models/sender_analysis.dart';
 import '../../../../core/models/threat_analysis.dart';
-import '../../../../core/models/threat_message.dart';
-
-import '../../../../core/services/android_sms_message_source.dart';
-import '../../../../core/services/fake_sms_message_source.dart';
-import '../../../../core/services/hybrid_threat_analyzer.dart';
-import '../../../../core/services/logistic_regression_classifier.dart';
-import '../../../../core/services/ml_feature_encoder.dart';
-import '../../../../core/services/ml_training_dataset.dart';
-import '../../../../core/services/organization_url_analyzer.dart';
-import '../../../../core/services/sender_analyzer.dart';
+import '../../../../core/services/threat_engine.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/threat_widgets.dart';
+import '../../application/inbox_controller.dart';
 import 'sms_detail_screen.dart';
 
+/// Which subset of the inbox is shown.
+enum InboxFilter { all, highRisk, suspicious, safe }
+
+/// The analysed inbox: search, filter, sort, and a risk-first reading order.
 class SmsInboxScreen extends StatefulWidget {
-  const SmsInboxScreen({super.key});
+  final InboxController controller;
+
+  const SmsInboxScreen({super.key, required this.controller});
 
   @override
   State<SmsInboxScreen> createState() => _SmsInboxScreenState();
 }
 
 class _SmsInboxScreenState extends State<SmsInboxScreen> {
-  static const MethodChannel _smsChannel = MethodChannel('threatguard/sms');
+  final TextEditingController _searchController = TextEditingController();
 
-  late final HybridThreatAnalyzer _analyzer;
-
-  final AndroidSmsMessageSource _messageSource =
-      const AndroidSmsMessageSource();
-
-  final FakeSmsMessageSource _demoMessageSource = const FakeSmsMessageSource();
-
-  final SenderAnalyzer _senderAnalyzer = const SenderAnalyzer();
-
-  final OrganizationUrlAnalyzer _organizationUrlAnalyzer =
-      const OrganizationUrlAnalyzer();
-
-  List<ThreatMessage> _messages = const [];
-  bool _isLoading = false;
-  bool _isDemoMode = false;
-  bool _hasSmsPermission = false;
-  bool _smsPermissionPermanentlyDenied = false;
-  String? _errorMessage;
+  InboxFilter _filter = InboxFilter.all;
+  String _query = '';
+  bool _worstFirst = true;
 
   @override
   void initState() {
     super.initState();
-
-    final trainingExamples = const MlTrainingDataset().build();
-    final featureEncoder = const MlFeatureEncoder();
-
-    final featureVectors = trainingExamples
-        .map((example) => featureEncoder.encode(example.features))
-        .toList();
-
-    final classifier = LogisticRegressionClassifier.train(
-      examples: trainingExamples,
-      featureVectors: featureVectors,
-    );
-
-    _analyzer = HybridThreatAnalyzer(classifier: classifier);
-
-    _initializeInbox();
+    widget.controller.addListener(_onControllerChanged);
   }
 
-  Future<void> _initializeInbox() async {
-    try {
-      final hasPermission =
-          await _smsChannel.invokeMethod<bool>('checkSmsPermission') ?? false;
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _hasSmsPermission = hasPermission;
-        _smsPermissionPermanentlyDenied = false;
-      });
-
-      if (hasPermission) {
-        await _loadMessages();
-      }
-    } on PlatformException catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _errorMessage = error.message ?? 'Unable to check SMS permission.';
-      });
-    }
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onControllerChanged);
+    _searchController.dispose();
+    super.dispose();
   }
 
-  Future<void> _requestSmsPermission() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final granted =
-          await _smsChannel.invokeMethod<bool>('requestSmsPermission') ?? false;
-
-      if (!mounted) {
-        return;
-      }
-
-      if (granted) {
-        setState(() {
-          _hasSmsPermission = true;
-          _smsPermissionPermanentlyDenied = false;
-          _isLoading = false;
-        });
-
-        await _loadMessages();
-        return;
-      }
-
-      final permanentlyDenied =
-          await _smsChannel.invokeMethod<bool>(
-            'isSmsPermissionPermanentlyDenied',
-          ) ??
-          false;
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _hasSmsPermission = false;
-        _smsPermissionPermanentlyDenied = permanentlyDenied;
-        _isLoading = false;
-      });
-    } on PlatformException catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _isLoading = false;
-        _errorMessage = error.message ?? 'Unable to request SMS permission.';
-      });
-    }
-  }
-
-  Future<void> _openAppSettings() async {
-    try {
-      await _smsChannel.invokeMethod<void>('openAppSettings');
-    } on PlatformException {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _errorMessage = 'Unable to open app settings.';
-      });
-    }
-  }
-
-  Future<void> _loadMessages() async {
-    if (!_hasSmsPermission) {
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final messages = await _messageSource.readMessages();
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _messages = messages;
-        _isLoading = false;
-        _isDemoMode = false;
-      });
-    } on PlatformException catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _isLoading = false;
-        _errorMessage = error.message ?? 'Unable to read SMS messages.';
-      });
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Unable to read SMS messages.';
-      });
-    }
-  }
-
-  Future<void> _loadDemoMessages() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final messages = await _demoMessageSource.readMessages();
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _messages = messages;
-        _isLoading = false;
-        _isDemoMode = true;
-      });
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _isLoading = false;
-        _errorMessage = error.toString();
-      });
-    }
+  void _onControllerChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('SMS Inbox'),
-        actions: [
-          if (kDebugMode)
-            IconButton(
-              onPressed: _isLoading ? null : _loadDemoMessages,
-              icon: const Icon(Icons.science_outlined),
-              tooltip: 'Load demo messages',
-            ),
-          IconButton(
-            onPressed: _isLoading || !_hasSmsPermission ? null : _loadMessages,
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh messages',
-          ),
-        ],
-      ),
-      body: _buildBody(),
-    );
-  }
+    final controller = widget.controller;
 
-  Widget _buildBody() {
-    if (_isLoading) {
+    if (controller.isLoading && controller.messages.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.error_outline, size: 48),
-              const SizedBox(height: 16),
-              const Text(
-                'Unable to read SMS messages.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(_errorMessage!, textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              if (!_hasSmsPermission) ...[
-                if (_smsPermissionPermanentlyDenied)
-                  OutlinedButton.icon(
-                    onPressed: _openAppSettings,
-                    icon: const Icon(Icons.settings_outlined),
-                    label: const Text('Open App Settings'),
-                  )
-                else
-                  FilledButton.icon(
-                    onPressed: _requestSmsPermission,
-                    icon: const Icon(Icons.sms_outlined),
-                    label: const Text('Allow SMS Access'),
-                  ),
-              ] else
-                FilledButton.icon(
-                  onPressed: _loadMessages,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Try Again'),
-                ),
-            ],
-          ),
-        ),
-      );
+    if (controller.errorMessage != null && controller.messages.isEmpty) {
+      return _buildError();
     }
 
-    if (!_hasSmsPermission && !_isDemoMode) {
+    if (!controller.hasSmsPermission && !controller.isDemoMode) {
       return _buildPermissionRequest();
     }
 
-    if (_messages.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.sms_outlined, size: 64),
-              SizedBox(height: 16),
-              Text(
-                'No SMS messages found.',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'ThreatGuard could not find any messages on this device.',
-                textAlign: TextAlign.center,
-              ),
-            ],
+    if (controller.messages.isEmpty) {
+      return EmptyState(
+        icon: Icons.inbox_outlined,
+        title: 'No messages found',
+        message: 'ThreatGuard could not find any SMS messages on this device.',
+        actions: [
+          FilledButton.icon(
+            onPressed: controller.loadMessages,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Scan again'),
           ),
-        ),
+        ],
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: _loadMessages,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: _messages.length + (_isDemoMode ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (_isDemoMode && index == 0) {
-            return _buildDemoModeBanner();
-          }
+    final entries = _buildEntries();
 
-          final messageIndex = _isDemoMode ? index - 1 : index;
-          return _buildMessageCard(_messages[messageIndex]);
-        },
+    return Column(
+      children: [
+        _buildToolbar(context, entries.length),
+        if (controller.isDemoMode) _demoBanner(context),
+        Expanded(
+          child: entries.isEmpty
+              ? EmptyState(
+                  icon: Icons.filter_alt_off_outlined,
+                  title: 'Nothing matches',
+                  message: 'No messages match the current filter or search.',
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _query = '';
+                          _filter = InboxFilter.all;
+                        });
+                      },
+                      child: const Text('Clear filters'),
+                    ),
+                  ],
+                )
+              : RefreshIndicator(
+                  onRefresh: controller.loadMessages,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(12, 4, 12, 24),
+                    itemCount: entries.length,
+                    itemBuilder: (context, index) =>
+                        _messageCard(entries[index]),
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+
+  /// Applies search, filter and sort to produce the visible ordering.
+  List<MessageThreatReport> _buildEntries() {
+    final controller = widget.controller;
+    final muted = controller.store?.mutedSenders ?? const <String>{};
+
+    var reports = controller.reports
+        .where((report) {
+          final sender = report.message.sender?.trim() ?? '';
+          return !muted.contains(sender);
+        })
+        .toList();
+
+    if (_query.isNotEmpty) {
+      final q = _query.toLowerCase();
+      reports = reports
+          .where(
+            (r) =>
+                r.message.body.toLowerCase().contains(q) ||
+                (r.message.sender ?? '').toLowerCase().contains(q),
+          )
+          .toList();
+    }
+
+    reports = reports
+        .where((r) {
+          final level = r.analysis.finalLevel;
+          return switch (_filter) {
+            InboxFilter.all => true,
+            InboxFilter.highRisk => level == ThreatLevel.highRisk,
+            InboxFilter.suspicious => level == ThreatLevel.suspicious,
+            InboxFilter.safe => level == ThreatLevel.safe,
+          };
+        })
+        .toList();
+
+    reports.sort((a, b) {
+      if (_worstFirst) {
+        final byRisk = b.analysis.blendedRiskScore.compareTo(
+          a.analysis.blendedRiskScore,
+        );
+        if (byRisk != 0) return byRisk;
+      }
+
+      final aDate = a.message.receivedAt;
+      final bDate = b.message.receivedAt;
+      if (aDate == null || bDate == null) return 0;
+      return bDate.compareTo(aDate);
+    });
+
+    return reports;
+  }
+
+  Widget _buildToolbar(BuildContext context, int count) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      child: Column(
+        children: [
+          TextField(
+            controller: _searchController,
+            onChanged: (value) => setState(() => _query = value.trim()),
+            decoration: InputDecoration(
+              hintText: 'Search messages or senders',
+              prefixIcon: const Icon(Icons.search),
+              isDense: true,
+              suffixIcon: _query.isEmpty
+                  ? null
+                  : IconButton(
+                      icon: const Icon(Icons.close, size: 18),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => _query = '');
+                      },
+                    ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _filterChip('All', InboxFilter.all),
+                      const SizedBox(width: 8),
+                      _filterChip('High risk', InboxFilter.highRisk),
+                      const SizedBox(width: 8),
+                      _filterChip('Suspicious', InboxFilter.suspicious),
+                      const SizedBox(width: 8),
+                      _filterChip('Safe', InboxFilter.safe),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Tooltip(
+                message: _worstFirst ? 'Worst first' : 'Newest first',
+                child: IconButton(
+                  onPressed: () => setState(() => _worstFirst = !_worstFirst),
+                  icon: Icon(
+                    _worstFirst
+                        ? Icons.sort_by_alpha_outlined
+                        : Icons.schedule_outlined,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '$count message${count == 1 ? '' : 's'}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _filterChip(String label, InboxFilter value) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: _filter == value,
+      onSelected: (_) => setState(() => _filter = value),
+    );
+  }
+
+  Widget _demoBanner(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+        color: Colors.amber.withValues(alpha: 0.14),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.science_outlined, size: 18),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text(
+              'Demo mode — these are simulated messages.',
+              style: TextStyle(fontSize: 12.5),
+            ),
+          ),
+          TextButton(
+            onPressed: widget.controller.loadMessages,
+            child: const Text('Exit'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildError() {
+    final controller = widget.controller;
+
+    return EmptyState(
+      icon: Icons.error_outline,
+      title: 'Unable to read messages',
+      message: controller.errorMessage ?? 'An unexpected error occurred.',
+      actions: [
+        if (!controller.hasSmsPermission)
+          controller.permissionPermanentlyDenied
+              ? OutlinedButton.icon(
+                  onPressed: controller.openAppSettings,
+                  icon: const Icon(Icons.settings_outlined),
+                  label: const Text('Open app settings'),
+                )
+              : FilledButton.icon(
+                  onPressed: controller.requestPermission,
+                  icon: const Icon(Icons.sms_outlined),
+                  label: const Text('Allow SMS access'),
+                )
+        else
+          FilledButton.icon(
+            onPressed: controller.loadMessages,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Try again'),
+          ),
+      ],
     );
   }
 
   Widget _buildPermissionRequest() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.sms_outlined, size: 64),
-            const SizedBox(height: 20),
-            const Text(
-              'SMS Access Required',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'ThreatGuard needs access to your SMS messages '
-              'so it can analyze them for phishing, scams, spam, '
-              'and social engineering threats.',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            if (_smsPermissionPermanentlyDenied) ...[
-              const Text(
-                'SMS access has been permanently denied. '
-                'Open App Settings to allow SMS access manually.',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed: _openAppSettings,
-                icon: const Icon(Icons.settings_outlined),
-                label: const Text('Open App Settings'),
-              ),
-            ] else
-              FilledButton.icon(
-                onPressed: _requestSmsPermission,
-                icon: const Icon(Icons.lock_open_outlined),
-                label: const Text('Allow SMS Access'),
-              ),
-            if (kDebugMode) ...[
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: _loadDemoMessages,
-                child: const Text('Use Demo Messages Instead'),
+    final controller = widget.controller;
+
+    return EmptyState(
+      icon: Icons.shield_outlined,
+      title: 'Scan your messages',
+      message: controller.permissionPermanentlyDenied
+          ? 'SMS access was permanently denied. Open app settings to enable it '
+                'manually.'
+          : 'ThreatGuard needs SMS access to detect phishing, scams and social '
+                'engineering. Analysis happens entirely on your device.',
+      actions: [
+        if (controller.permissionPermanentlyDenied)
+          OutlinedButton.icon(
+            onPressed: controller.openAppSettings,
+            icon: const Icon(Icons.settings_outlined),
+            label: const Text('Open app settings'),
+          )
+        else
+          FilledButton.icon(
+            onPressed: controller.requestPermission,
+            icon: const Icon(Icons.lock_open_outlined),
+            label: const Text('Allow SMS access'),
+          ),
+        if (kDebugMode)
+          TextButton(
+            onPressed: controller.loadDemoMessages,
+            child: const Text('Explore with demo messages'),
+          ),
+      ],
+    );
+  }
+
+  Widget _messageCard(MessageThreatReport report) {
+    final analysis = report.analysis;
+    final level = analysis.finalLevel;
+    final color = AppTheme.levelColor(level);
+    final message = report.message;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _openDetail(report),
+        onLongPress: () => _showMessageActions(report),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(width: 5, color: color),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundColor: color.withValues(alpha: 0.14),
+                            child: Icon(
+                              AppTheme.levelIcon(level),
+                              size: 17,
+                              color: color,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  message.sender ?? 'Unknown sender',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14.5,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (message.receivedAt != null)
+                                  Text(
+                                    _formatReceivedAt(
+                                      context,
+                                      message.receivedAt!,
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          TypeBadge(type: analysis.finalType, compact: true),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        message.body,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 13.5, height: 1.35),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          RiskChip(
+                            score: analysis.blendedRiskScore,
+                            level: level,
+                          ),
+                          const Spacer(),
+                          if (report.templateMatch?.isCampaign ?? false)
+                            _tinyFlag(
+                              context,
+                              Icons.content_copy_outlined,
+                              'Campaign',
+                            ),
+                          if (analysis.ruleAnalysis.indicators.isNotEmpty)
+                            _tinyFlag(
+                              context,
+                              Icons.flag_outlined,
+                              '${analysis.ruleAnalysis.indicators.length}',
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildDemoModeBanner() {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.amber.withValues(alpha: 0.12),
-        border: Border.all(color: Colors.amber.withValues(alpha: 0.35)),
-      ),
-      child: const Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _tinyFlag(BuildContext context, IconData icon, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 10),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.science_outlined, size: 20),
-          SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Demo Mode',
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                ),
-                SizedBox(height: 3),
-                Text(
-                  'These are simulated messages for testing. '
-                  'Tap Refresh to return to your real SMS inbox.',
-                ),
-              ],
+          Icon(
+            icon,
+            size: 13,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 3),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -438,82 +469,51 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
     );
   }
 
-  Widget _buildMessageCard(ThreatMessage message) {
-    final analysis = _analyzer.analyze(message.body);
-    final ruleAnalysis = analysis.ruleAnalysis;
-    final senderAnalysis = _senderAnalyzer.analyze(message.sender);
-
-    final organizationUrlCheck = _organizationUrlAnalyzer.analyze(
-      senderAnalysis: senderAnalysis,
-      urls: ruleAnalysis.detectedUrls,
+  void _openDetail(MessageThreatReport report) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SmsDetailScreen(
+          report: report,
+          engine: widget.controller.engine,
+          controller: widget.controller,
+        ),
+      ),
     );
+  }
 
-    final level = analysis.finalLevel;
+  void _showMessageActions(MessageThreatReport report) {
+    final sender = report.message.sender?.trim();
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => SmsDetailScreen(
-                message: message,
-                analysis: analysis,
-                senderAnalysis: senderAnalysis,
-                organizationUrlCheck: organizationUrlCheck,
-              ),
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.open_in_new),
+              title: const Text('Open analysis'),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                _openDetail(report);
+              },
             ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(child: Icon(_iconForLevel(level))),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          message.sender ?? 'Unknown sender',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        if (message.receivedAt != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            _formatReceivedAt(context, message.receivedAt!),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 4),
-                        _buildRiskBadge(level, ruleAnalysis.riskScore),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.chevron_right),
-                ],
+            if (sender != null && sender.isNotEmpty)
+              ListTile(
+                leading: const Icon(Icons.volume_off_outlined),
+                title: Text('Mute $sender'),
+                subtitle: const Text(
+                  'Hide future messages from this sender from the inbox.',
+                ),
+                onTap: () {
+                  widget.controller.muteSender(sender);
+                  Navigator.of(sheetContext).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Muted $sender')),
+                  );
+                },
               ),
-              const SizedBox(height: 12),
-              _buildSenderVerification(senderAnalysis),
-              const SizedBox(height: 10),
-              _buildOrganizationUrlVerification(organizationUrlCheck),
-              const SizedBox(height: 14),
-              Text(message.body, maxLines: 4, overflow: TextOverflow.ellipsis),
-              const SizedBox(height: 12),
-              Text(
-                _classificationLabel(analysis.finalType),
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -524,15 +524,13 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
     final now = DateTime.now();
 
     if (DateUtils.isSameDay(localDate, now)) {
-      return MaterialLocalizations.of(context)
-          .formatTimeOfDay(TimeOfDay.fromDateTime(localDate));
+      return MaterialLocalizations.of(
+        context,
+      ).formatTimeOfDay(TimeOfDay.fromDateTime(localDate));
     }
 
     final yesterday = now.subtract(const Duration(days: 1));
-
-    if (DateUtils.isSameDay(localDate, yesterday)) {
-      return 'Yesterday';
-    }
+    if (DateUtils.isSameDay(localDate, yesterday)) return 'Yesterday';
 
     const months = [
       'Jan',
@@ -549,187 +547,7 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
       'Dec',
     ];
 
-    return '${months[localDate.month - 1]} '
-        '${localDate.day}, ${localDate.year}';
-  }
-
-  Widget _buildSenderVerification(SenderAnalysis analysis) {
-    if (analysis.verificationStatus == SenderVerificationStatus.recognized) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.blue.withValues(alpha: 0.08),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(Icons.business_outlined, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Sender name matches organization',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(analysis.organization!),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Sender names can be spoofed. This match does not verify the sender.',
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.grey.withValues(alpha: 0.08),
-      ),
-      child: const Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.help_outline, size: 20),
-          SizedBox(width: 10),
-          Expanded(child: Text('Sender organization could not be verified.')),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOrganizationUrlVerification(OrganizationUrlCheck check) {
-    switch (check.consistency) {
-      case OrganizationUrlConsistency.noUrl:
-        return const SizedBox.shrink();
-
-      case OrganizationUrlConsistency.consistent:
-        return _buildVerificationBanner(
-          icon: Icons.verified_outlined,
-
-          title: 'Link domain matches organization',
-          message:
-              'The detected link uses a domain associated with '
-              '${check.organization}. This does not verify that the message or link is safe.',
-        );
-
-      case OrganizationUrlConsistency.inconsistent:
-        return _buildVerificationBanner(
-          icon: Icons.warning_amber_outlined,
-          title: 'Link does not match organization',
-          message:
-              'The detected link does not match the known official '
-              'domains for ${check.organization}.',
-        );
-
-      case OrganizationUrlConsistency.unknown:
-        return _buildVerificationBanner(
-          icon: Icons.help_outline,
-          title: 'Link organization could not be verified',
-          message:
-              'The sender or organization could not be linked to '
-              'an official domain.',
-        );
-    }
-  }
-
-  Widget _buildVerificationBanner({
-    required IconData icon,
-    required String title,
-    required String message,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.grey.withValues(alpha: 0.08),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 3),
-                Text(message),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRiskBadge(ThreatLevel level, int score) {
-    return Text(
-      '${_levelLabel(level)} • $score/100',
-      style: TextStyle(fontWeight: FontWeight.w600, color: _levelColor(level)),
-    );
-  }
-
-  String _levelLabel(ThreatLevel level) {
-    switch (level) {
-      case ThreatLevel.safe:
-        return 'Low Risk';
-      case ThreatLevel.suspicious:
-        return 'Suspicious';
-      case ThreatLevel.highRisk:
-        return 'High Risk';
-    }
-  }
-
-  String _classificationLabel(ThreatType type) {
-    switch (type) {
-      case ThreatType.legitimate:
-        return 'Likely Legitimate';
-      case ThreatType.spam:
-        return 'Spam';
-      case ThreatType.phishing:
-        return 'Phishing';
-      case ThreatType.scam:
-        return 'Scam';
-      case ThreatType.socialEngineering:
-        return 'Social Engineering';
-    }
-  }
-
-  IconData _iconForLevel(ThreatLevel level) {
-    switch (level) {
-      case ThreatLevel.safe:
-        return Icons.info_outline;
-      case ThreatLevel.suspicious:
-        return Icons.warning_amber;
-      case ThreatLevel.highRisk:
-        return Icons.dangerous;
-    }
-  }
-
-  Color _levelColor(ThreatLevel level) {
-    switch (level) {
-      case ThreatLevel.safe:
-        return Colors.green;
-      case ThreatLevel.suspicious:
-        return Colors.orange;
-      case ThreatLevel.highRisk:
-        return Colors.red;
-    }
+    return '${months[localDate.month - 1]} ${localDate.day}, '
+        '${localDate.year}';
   }
 }

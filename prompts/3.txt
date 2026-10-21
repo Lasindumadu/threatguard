@@ -1,0 +1,112 @@
+# THREATGUARD PHASE 3 — ADVANCED URL, DOMAIN AND WEBSITE INVESTIGATION
+
+Continue the existing ThreatGuard Flutter project. Inspect current URL forensics, URL extraction, organization registry, analysis result models, network abstractions, persistence, UI and tests before implementation.
+
+## Objective
+
+Build a comprehensive URL and website investigation tool that works offline for local analysis and optionally enriches results with trusted external data providers.
+
+## Task 1 — Safe URL parsing
+
+Implement or improve robust URL parsing for:
+- HTTP and HTTPS URLs
+- URLs without an explicit scheme
+- Internationalized domain names and punycode
+- Unicode lookalike and homograph warning indicators
+- IP-address hosts
+- Unusual ports and subdomains
+- User-info sections that may disguise the real host
+- URL-encoded and nested URLs
+- Excessive subdomains and unusual hostname structure
+- Suspicious path and query patterns
+- URL shorteners
+- Malformed and excessively long inputs
+
+Normalize carefully without destroying evidence. Always display the actual destination hostname clearly. Never treat the brand name in a path as proof that the domain belongs to that brand.
+
+## Task 2 — Explainable risk analysis
+
+Create a structured report with:
+- Submitted URL
+- Normalized URL
+- Effective hostname and registrable domain where safely determinable
+- HTTPS status when actually checked
+- Structural warning indicators
+- Redirect information when actually retrieved
+- Known reputation results, if available
+- Organization/brand resemblance warnings
+- Evidence, limitations and recommended actions
+
+Keep heuristic risk, verified reputation and technical facts separate. A URL should not be declared malicious just because it contains a long path, uses a shortener, or has a new-looking domain.
+
+## Task 3 — Domain and registration intelligence
+
+Add a modular provider interface for optional lookups of:
+- Domain registration/creation information using RDAP or a suitable current source
+- Nameserver and DNS records where supported
+- Certificate and TLS information
+- Redirect destinations
+- Trusted reputation or blocklist results
+
+Requirements:
+- Verify the current official API specifications before integrating a provider.
+- Do not invent endpoints, responses or authentication behavior.
+- Handle unavailable records, privacy-redacted registrants, rate limits, timeouts and provider errors.
+- Show lookup time and source.
+- Explain that registration age or a privacy-protected registration is not proof of malicious activity.
+- Do not imply that a certificate's existence verifies that a website is legitimate.
+- Use a provider abstraction so the app can work without network access or credentials.
+
+Do not scrape websites or bypass access controls. Do not add a paid API dependency without my explicit approval.
+
+## Task 4 — Redirect and active-content safety
+
+- Never automatically open suspicious URLs in the user's normal browser.
+- Do not execute page scripts, download unknown files or submit forms.
+- If following redirects is supported, use a controlled HTTP client with strict timeouts, redirect limits and protections against requests to private, loopback, link-local and internal network addresses.
+- Revalidate every redirect destination.
+- Protect against SSRF-style behavior if a backend or proxy is ever introduced.
+- Never send local files, credentials or unrelated personal information to a reputation provider.
+- Avoid logging complete sensitive query strings unnecessarily.
+- Clearly explain when redirect inspection was skipped or blocked for safety.
+
+## Task 5 — Reputation integration
+
+Design optional integrations for trusted URL reputation providers using the current official APIs and terms.
+
+- Keep provider credentials out of source control and mobile app bundles.
+- Do not include secret API keys in Flutter code.
+- If a provider requires a protected backend, implement only the safe client/provider interface and document the backend requirement unless an approved existing backend is available.
+- Cache results with suitable expiry and provider-specific terms.
+- Distinguish no result from a clean result.
+- Support offline analysis and graceful degradation.
+
+## Task 6 — User interface
+
+Add a URL investigation workflow consistent with the existing five-tab application:
+- Paste or share a URL
+- Scan action with progress and timeout handling
+- Clear overall result with a detailed evidence breakdown
+- Technical details in an expandable section
+- Source and timestamp for external reputation
+- Safe copy/export of a report
+- Clear warning before a user chooses to open a link
+- Friendly error, offline and unknown-result states
+
+Do not redesign navigation without a demonstrated need.
+
+## Task 7 — Tests
+
+Add tests for IDNs, homographs, IP URLs, malformed URLs, nested URLs, suspicious user-info, redirect loops, blocked internal destinations, provider timeouts, missing credentials, cache expiry, and benign websites.
+
+Use local mocks and reserved test domains. Tests must not contact live malicious websites.
+
+## Constraints
+
+No fake reputation results, no fabricated ownership details, no silent network calls, no automatic opening of risky URLs, and no paid API without approval.
+
+Run relevant tests, full tests where feasible, static analysis and a web build if supported.
+
+## Final report
+
+Document features actually implemented, provider sources, privacy implications, security controls, tests, commands and remaining limitations. Clearly state which data was obtained live and which was mocked. Stop after Phase 3.

@@ -1,0 +1,109 @@
+# THREATGUARD PHASE 6 — THREAT INTELLIGENCE, INCIDENT RESPONSE AND PERSONAL CYBERSECURITY
+
+Continue the existing ThreatGuard application. Reuse existing history, advisories, URL forensics, organization registry, channel settings and UI components.
+
+## Objective
+
+Create an integrated set of practical cybersecurity tools that help users understand threats, investigate suspicious activity and take safer next steps.
+
+## Task 1 — Threat intelligence architecture
+
+Inspect the current threat-advisory implementation and introduce or improve a modular intelligence-source abstraction.
+
+Potential source types:
+- Official cybersecurity advisories
+- Publicly accessible government cyber alerts
+- Reputable domain/URL reputation providers
+- Trusted public threat feeds with clear licensing and terms
+- User-reported suspicious messages, clearly separated from verified intelligence
+
+Verify that each proposed source currently exists, is authoritative enough for its intended use, permits the intended access and has a usable integration method.
+
+Do not fabricate feeds or assume that a webpage is a supported API.
+
+For every retrieved item, preserve source, publication/update time, retrieval time, category and any available confidence or status.
+
+## Task 2 — Safe threat feed handling
+
+- Support refresh, loading, offline, stale-data and provider-error states.
+- Use caching and rate limits.
+- Validate remote data before parsing or displaying it.
+- Avoid rendering untrusted HTML or executing remote content.
+- Avoid sending personal message content to threat-feed providers.
+- Explain when no data is available instead of treating absence of data as proof of safety.
+- Clearly distinguish official advisories, third-party reputation, and community reports.
+
+Keep core local analysis usable without internet access.
+
+## Task 3 — Scam campaign similarity
+
+Improve the existing campaign fingerprinting if present.
+
+Group potentially related messages using explainable similarities such as normalized text patterns, domain structure, repeated payment requests and shared indicators.
+
+- Avoid storing raw sensitive message contents solely for campaign matching.
+- Do not claim that two messages came from the same criminal merely because they look similar.
+- Display the evidence for a similarity relationship.
+- Allow the user to delete relevant history and derived local data.
+- Test common false matches and benign templates.
+
+## Task 4 — Incident-response assistant
+
+Add guided workflows for:
+- User clicked a suspicious link
+- User entered a password
+- User shared an OTP
+- User installed a suspicious application
+- User sent money to a suspected scammer
+- User opened a suspicious attachment
+- User suspects account takeover
+- User suspects impersonation or identity misuse
+
+Give calm, ordered and situation-appropriate advice. For example, direct a user who shared credentials toward changing them through the official site/app, securing the associated email, enabling multifactor authentication where available, and contacting the legitimate provider.
+
+For suspected financial fraud, advise prompt contact with the bank or payment provider using independently verified contact information. Do not guarantee recovery or invent local emergency contacts.
+
+Clearly distinguish general guidance from verified case-specific facts. Do not ask users to disclose passwords, OTPs, full card numbers or recovery codes.
+
+## Task 5 — Additional personal cybersecurity tools
+
+Audit existing functionality before implementing:
+- Password-strength guidance using local-only checks
+- Password reuse warning only if the user supplies safe, non-secret evidence or an appropriate secure method exists
+- Breach-check assistance through a verified provider or a privacy-preserving protocol
+- Account-security checklist
+- Software update and device-security guidance
+- Permission/privacy education
+- QR-code link inspection
+- File hash calculation and reputation lookup where supported
+- Security glossary and short interactive lessons
+- Security incident notes with optional redaction
+
+Do not claim to know all installed applications or device vulnerabilities unless the platform provides that information and permission is justified. Never transmit plaintext passwords.
+
+For password breach checks, use a proven privacy-preserving approach such as a supported k-anonymity protocol when appropriate. Do not send complete passwords or raw password hashes to an external provider.
+
+## Task 6 — Reporting and user feedback
+
+Provide safe, optional ways to export or share:
+- Analysis summaries
+- URLs and relevant indicators
+- Provider citations
+- Incident notes
+- False-positive feedback
+
+Before export, show the user what will be included. Redact secrets and unnecessary personal information by default.
+
+Do not treat user feedback as verified ground truth automatically. Separate reports, confirmed intelligence and training labels.
+
+## Task 7 — Tests and safety
+
+Test stale feeds, malformed feed data, network errors, duplicate advisories, conflicting sources, malicious input, local-only workflows, privacy redaction and incident-response navigation.
+
+## Constraints
+
+Do not introduce covert surveillance, automatic blocking that is not supported by the operating system, account access, automatic payments, or a paid provider without approval. Do not promise real-time protection unless the implementation actually provides it.
+
+## Final report
+
+Document each completed tool, real provider and its terms, privacy model, limitations, tests and exact command results. Stop after Phase 6.

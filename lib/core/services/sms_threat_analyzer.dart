@@ -15,6 +15,6 @@ class SmsThreatAnalyzer {
       );
     }
 
-    return analyzer.analyze(message.body);
+    return analyzer.analyze(message.body, source: message.source);
   }
 }

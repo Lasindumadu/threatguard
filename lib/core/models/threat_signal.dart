@@ -21,6 +21,12 @@ class ThreatSignal {
   final String description;
   final String evidence;
 
+  /// Points this signal adds to the additive risk score.
+  ///
+  /// Carried on the signal itself so the analyzer does not have to scan the
+  /// whole rule catalog again for every match.
+  final int scoreContribution;
+
   const ThreatSignal({
     required this.id,
     required this.ruleId,
@@ -29,5 +35,6 @@ class ThreatSignal {
     required this.title,
     required this.description,
     required this.evidence,
+    this.scoreContribution = 0,
   });
 }

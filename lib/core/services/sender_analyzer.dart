@@ -47,6 +47,21 @@ class SenderAnalyzer {
     );
   }
 
+  /// Whether [sender] is machine-checkable against the registry at all.
+  ///
+  /// A long number (+94 77 123 4567) or an alphanumeric header ("HNB") can be
+  /// spoofed by anyone with an SMS gateway, so an unrecognised one says nothing.
+  /// A *short code* cannot: operators assign them to one registered sender, so
+  /// a short code absent from the registry is a fact worth reporting rather than
+  /// a gap in coverage. This is a bounded set (a handful of digits), never free
+  /// text, so the lookup stays linear.
+  bool isCheckableShortCode(String? sender) {
+    final normalized = _normalizeSender(sender ?? '');
+    if (normalized.isEmpty) return false;
+    if (_detectSenderType(normalized) != SenderType.shortCode) return false;
+    return _findOrganization(normalized) == null;
+  }
+
   String _normalizeSender(String sender) {
     return sender.trim().toLowerCase();
   }

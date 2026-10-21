@@ -1,0 +1,103 @@
+# THREATGUARD PHASE 5 — MULTI-SOURCE CONTENT ANALYSIS AND EVIDENCE INTAKE
+
+Continue the existing Flutter project. Inspect current channel handling, analysis pipeline, clipboard service, Android configuration, file handling, navigation and permissions before implementing anything.
+
+## Objective
+
+Allow users to investigate more types of potentially suspicious content while preserving privacy, offline functionality and consistent analysis results.
+
+## Task 1 — Unified content intake
+
+Create or improve a shared content-intake abstraction for:
+- Manual text entry and paste
+- User-initiated clipboard analysis
+- Supported Android share-sheet content
+- SMS content where existing permissions and policies allow it
+- Text copied from messaging and social applications
+- Email body text and suspicious email headers when supplied by the user
+- URLs and domains
+- Supported text files and documents
+- Images containing text, if OCR is available or can be added safely
+- QR codes that contain URLs or other text
+
+Every intake source must normalize content and route it through the same appropriate analysis pipeline. Preserve the source type and metadata that are legitimately available.
+
+## Task 2 — Share-sheet integration
+
+Inspect current Android intent handling and Flutter plugin support.
+
+Implement user-initiated sharing of text and URLs from compatible apps. Handle:
+- Missing or empty shared text
+- Multiple shared items
+- Very long input
+- Unsupported content types
+- App already running versus cold start
+- Navigation to the correct analysis screen
+- Duplicate intents and repeated content
+- Cancellation and errors
+
+Do not claim support for WhatsApp, Gmail or another app until tested with that app or a representative platform test. Do not access private application databases.
+
+## Task 3 — Safe file and image analysis
+
+For supported formats, extract text safely from user-selected files and images.
+
+- Use platform file pickers and scoped access.
+- Enforce size and processing limits.
+- Do not execute or install submitted files.
+- Do not render active content unnecessarily.
+- Treat extracted text as untrusted input.
+- Preserve the original file unless the user explicitly deletes it.
+- Clearly report unsupported, encrypted, corrupt or oversized files.
+- If OCR requires a new dependency, verify compatibility and explain the impact before adding it.
+- Do not upload images or documents to cloud OCR without explicit informed consent.
+
+For QR codes, decode content without automatically opening the destination.
+
+## Task 4 — Email-specific analysis
+
+Where users provide email content, inspect available indicators such as:
+- Display name and sender address mismatch
+- Reply-to mismatch
+- Suspicious domains and links
+- Urgent credential or payment requests
+- Attachment names and types
+- Authentication header results, if actual headers are supplied
+
+Do not claim SPF, DKIM or DMARC passed or failed unless the relevant trustworthy header evidence is available and correctly evaluated. Do not claim to have inspected attachments that were not provided.
+
+## Task 5 — Unified results and history
+
+Ensure every supported intake route produces a consistent result model and preserves the origin channel.
+
+- Deduplicate repeated submissions where appropriate.
+- Allow users to review, delete and export their own history.
+- Keep analysis source, time, evidence and verdict together.
+- Avoid storing full sensitive content unnecessarily.
+- Make clear which input was analyzed and which content could not be inspected.
+- Respect channel toggles without blocking intended user-initiated manual analysis.
+
+## Task 6 — Clipboard behavior
+
+Review clipboard-watch lifecycle and privacy.
+
+- Prevent repeated analysis of unchanged clipboard contents.
+- Stop monitoring when disabled.
+- Respect app lifecycle and platform restrictions.
+- Avoid sending clipboard contents to external services automatically.
+- Do not silently persist passwords, OTPs or other sensitive clipboard text.
+- Explain clipboard behavior clearly in settings.
+
+## Task 7 — Tests and verification
+
+Add tests for text intake, URLs, share intents, file-size limits, unsupported files, OCR failures, QR decoding, duplicate submissions, clipboard lifecycle and source preservation.
+
+Run Flutter tests, analysis, web build and Android-specific checks where the environment supports them. Report platform limitations honestly.
+
+## Constraints
+
+Do not add unrestricted inbox access, accessibility-based surveillance or contact harvesting. Do not upload user content without explicit consent. Preserve the existing five-tab architecture.
+
+## Final report
+
+Report supported input types, platform-specific implementation, permissions, privacy behavior, files changed, tests and actual command results. Stop after Phase 5.

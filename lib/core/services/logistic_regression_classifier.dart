@@ -141,18 +141,7 @@ class LogisticRegressionClassifier implements MlClassifier {
 
   @override
   MlPrediction predict(List<double> features) {
-    if (features.length != means.length) {
-      throw ArgumentError(
-        'Expected ${means.length} features, '
-        'but received ${features.length}.',
-      );
-    }
-
-    final normalized = _normalize(features, means, standardDeviations);
-
-    final input = <double>[...normalized, 1.0];
-
-    final probabilities = _softmax(weights, input);
+    final probabilities = predictProbabilities(features);
 
     var bestIndex = 0;
 
@@ -165,8 +154,30 @@ class LogisticRegressionClassifier implements MlClassifier {
     return MlPrediction(
       type: classes[bestIndex],
       confidence: probabilities[bestIndex],
+      probabilities: List.unmodifiable(probabilities),
     );
   }
+
+  /// Raw softmax output for every class, in [MlThreatType.values] order.
+  ///
+  /// Used by the arbitration layer (margin-aware confidence) and by the
+  /// evaluation harness to build confusion matrices.
+  List<double> predictProbabilities(List<double> features) {
+    if (features.length != means.length) {
+      throw ArgumentError(
+        'Expected ${means.length} features, '
+        'but received ${features.length}.',
+      );
+    }
+
+    final normalized = _normalize(features, means, standardDeviations);
+    final input = <double>[...normalized, 1.0];
+
+    return _softmax(weights, input);
+  }
+
+  /// Index of [type] within the trained class order.
+  int indexOfClass(MlThreatType type) => classes.indexOf(type);
 
   static List<double> _normalize(
     List<double> features,

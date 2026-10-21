@@ -1,0 +1,120 @@
+# THREATGUARD PHASE 4 — PHONE NUMBER, SENDER AND PUBLIC IDENTITY INTELLIGENCE
+
+Continue the existing ThreatGuard project. Inspect current source, existing organization profiles, phone/sender rules, message sources, local storage, UI and tests.
+
+## Objective
+
+Build a safe investigation tool for phone numbers and senders. Provide as much legitimate, verifiable information as available without exposing private personal information, inventing identities or falsely authenticating callers.
+
+## Task 1 — Phone-number normalization and validation
+
+Implement or improve phone-number handling using an established package already in the project if suitable.
+
+Support:
+- International E.164 normalization
+- Country calling-code detection
+- Local/international formatting
+- Plausibility and validity checks
+- Sri Lankan number formats and common input variations
+- Invalid, incomplete and ambiguous numbers
+- Extensions where appropriate
+
+Do not infer a person's location from a country code. Do not confuse number validity with ownership or safety.
+
+Add tests for Sri Lankan and international formats, malformed numbers, missing country context and normalization edge cases.
+
+## Task 2 — Public numbering metadata
+
+Design an optional provider interface to retrieve supported metadata such as:
+- Country and numbering region
+- Number type where available
+- Carrier or network allocation where supported
+- Portability limitations and uncertainty
+- Provider/source and retrieval time
+
+Verify the current official API documentation and provider terms before integration.
+
+Explain that carrier allocation data may be stale, unavailable, or unrelated to the current carrier after number portability. Do not pretend that a lookup identifies the current subscriber.
+
+Do not add a paid provider without explicit approval. Keep the feature useful offline through number normalization and transparent local analysis.
+
+## Task 3 — Public business and organization lookup
+
+Where lawful public sources exist, allow investigation of numbers publicly listed by businesses or organizations.
+
+- Prefer official organization websites and verified public business directories.
+- Show the exact source and link.
+- Distinguish an official published contact number from a number merely mentioned on an unverified website.
+- Do not treat a business name returned by a weak source as proof that the caller is that business.
+- Do not use private or leaked databases.
+- Do not scrape or bypass access restrictions.
+
+Support the existing Sri Lankan organization registry and make source provenance, verification date and confidence visible.
+
+## Task 4 — Sender and caller reputation
+
+Create a provider interface for community reports and reputable spam/scam intelligence sources if suitable providers can be verified.
+
+Display:
+- Report counts only when actually available
+- Report categories and dates where provided
+- Source reputation and lookup time
+- Disagreement between sources
+- Confidence and limitations
+- A clear distinction between community allegations and verified facts
+
+Do not automatically trust a sender because its display name resembles a bank or company.
+
+Treat SMS sender IDs, caller ID and message headers as spoofable unless the platform provides reliable authentication evidence.
+
+## Task 5 — Message-to-sender consistency
+
+Improve analysis of:
+- Sender display name versus message content
+- Brand impersonation patterns
+- Sender ID variations
+- Suspicious payment or credential requests
+- Unexpected links and mismatch with known official domains
+- Repeated scam patterns in user-reported content
+
+Use these only as evidence indicators. A sender/content mismatch does not by itself establish a criminal identity.
+
+## Task 6 — Number and link investigation reports
+
+Provide a common investigation report structure containing:
+- Submitted value
+- Normalized number or URL
+- Public metadata obtained
+- Source and timestamp for every external claim
+- Threat indicators
+- Verified versus unverified facts
+- Risk assessment and limitations
+- Recommended safe actions
+
+Allow safe copy/export. Redact sensitive data from diagnostic logs and avoid saving lookups unnecessarily.
+
+## Task 7 — Privacy and abuse safeguards
+
+Do not implement:
+- Private subscriber identity discovery
+- Precise live-location tracking of a phone-number owner
+- Doxxing or leaked-data searches
+- Unauthorized account access
+- Identity claims derived solely from caller ID
+- Silent background uploads of contacts or messages
+
+Do not promise to reveal the actual owner of an arbitrary number. If no legitimate public source identifies an organization, explicitly say that the owner could not be verified.
+
+Require informed consent for optional external lookups and disclose what data is sent to each provider.
+
+## Task 8 — Tests
+
+Test number normalization, source attribution, stale/unavailable providers, spoofed sender IDs, conflicting reputation reports, unknown numbers, business contacts, privacy redaction and failure handling.
+
+Use fixtures and mocked providers; never query private individuals in automated tests.
+
+## Constraints and final report
+
+Preserve the existing app architecture, use no paid APIs without approval, do not invent live results, and run relevant tests and analysis.
+
+Report exactly which metadata can be retrieved, from which real providers, under which limitations, and which capabilities remain offline-only. Stop after Phase 4.

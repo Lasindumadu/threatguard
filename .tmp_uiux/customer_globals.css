@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --text: #101828;
+    --muted: #667085;
+    --border: #e6e8ec;
+  }
+  .dark {
+    --text: #f2f4f7;
+    --muted: #98a2b3;
+    --border: #2a2e36;
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-white dark:bg-[#0F1115] text-text dark:text-[#F2F4F7] font-sans antialiased;
+    overscroll-behavior-y: none;
+  }
+  .text-muted {
+    color: var(--muted);
+  }
+  .text-text {
+    color: var(--text);
+  }
+  .border-border {
+    border-color: var(--border);
+  }
+}
+
+/* ---------- Motion tokens ----------
+   Durations are short and purposeful (guide 06):
+   micro (hover/press) 120ms, small (chips/sheets) 180ms, large (route/sheet) 240ms. */
+:root {
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 240ms;
+  --ease-out: cubic-bezier(0.2, 0.6, 0.4, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+html,
+body,
+#__next {
+  height: 100%;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d0d5dd transparent;
+}
+
+.dark * {
+  scrollbar-color: #3a3f47 transparent;
+}
+
+.leaflet-container {
+  font-family: inherit;
+  background: #eef2f5;
+}
+
+.dark .leaflet-container {
+  background: #15181d;
+}
+
+.dark .leaflet-tile-pane {
+  filter: brightness(0.75) saturate(0.7);
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.radar-ping {
+  animation: pulse-ring 1.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.safe-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
+}
+
+input[type="tel"] {
+  font-size: 16px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

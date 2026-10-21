@@ -18,11 +18,56 @@ class MlDatasetSplitter {
 
     for (final entry in groups.entries) {
       final group = List<MlTrainingExample>.from(entry.value);
-      _shuffle(group, seed);
+      _shuffle(group, seed + entry.key.index);
       shuffledGroups[entry.key] = group;
     }
 
     return _splitByGroups(examplesByClass: shuffledGroups);
+  }
+
+  /// Three-way stratified split: train / dev / test.
+  ///
+  /// A separate dev set exists so hyper-parameters can be tuned without
+  /// touching the test set, which is what makes the final reported number
+  /// honest. Every split keeps at least one example of every class, so no
+  /// per-class metric is ever undefined.
+  MlDatasetSplit splitThreeWay(
+    List<MlTrainingExample> examples, {
+    required int seed,
+    double devFraction = 0.15,
+    double testFraction = 0.20,
+  }) {
+    final groups = _groupByClass(examples);
+
+    final training = <MlTrainingExample>[];
+    final dev = <MlTrainingExample>[];
+    final testing = <MlTrainingExample>[];
+
+    for (final entry in groups.entries) {
+      final group = List<MlTrainingExample>.from(entry.value)
+        ..sort((a, b) => a.features.caseId.compareTo(b.features.caseId));
+      _shuffle(group, seed + entry.key.index);
+
+      final n = group.length;
+      if (n == 0) continue;
+
+      // Guarantee at least one test example whenever the class has >= 3 items,
+      // and never let train fall below one example.
+      var testCount = (n * testFraction).round();
+      if (n >= 3 && testCount == 0) testCount = 1;
+      if (n - testCount < 1) testCount = n - 1;
+
+      var devCount = (n * devFraction).round();
+      if (n >= 5 && devCount == 0) devCount = 1;
+      if (n - testCount - devCount < 1) devCount = n - testCount - 1;
+      if (devCount < 0) devCount = 0;
+
+      testing.addAll(group.take(testCount));
+      dev.addAll(group.skip(testCount).take(devCount));
+      training.addAll(group.skip(testCount + devCount));
+    }
+
+    return MlDatasetSplit(training: training, dev: dev, testing: testing);
   }
 
   Map<MlThreatType, List<MlTrainingExample>> _groupByClass(
@@ -46,7 +91,13 @@ class MlDatasetSplitter {
     final testing = <MlTrainingExample>[];
 
     for (final group in examplesByClass.values) {
-      final testCount = _testCount(group.length);
+      var testCount = _testCount(group.length);
+
+      // Never leave a class out of the test set entirely when it has enough
+      // examples to spare one, and never empty the training set.
+      if (group.length >= 3 && testCount == 0) testCount = 1;
+      if (group.length - testCount < 1) testCount = group.length - 1;
+      if (testCount < 0) testCount = 0;
 
       testing.addAll(group.take(testCount));
       training.addAll(group.skip(testCount));

@@ -1,0 +1,127 @@
+# THREATGUARD PHASE 7 — PREMIUM VISUAL DESIGN, LOTTIE ANIMATIONS AND UX POLISH
+
+Continue the existing ThreatGuard Flutter project. Preserve working features, navigation, analysis behavior and accessibility.
+
+## Objective
+
+Upgrade the visual experience into a coherent, polished cybersecurity product with modern cards, readable threat reports, meaningful motion, responsive layouts and consistent light/dark themes.
+
+## Task 1 — Audit the existing visual system
+
+Inspect:
+- Theme and design tokens
+- Typography and spacing
+- Colors and risk indicators
+- Buttons, cards, forms, switches and navigation
+- Five-tab dashboard
+- Threat detail, URL investigation, history, Shield, settings and model-insights screens
+- Loading, empty, error, offline and unknown-result states
+- Localization, text scaling and accessibility
+
+Build on existing design tokens and shared widgets. Avoid rewriting screens that already meet the requirements.
+
+## Task 2 — Create a consistent design system
+
+Improve where needed:
+- Semantic colors for safe, suspicious, high-risk, unknown and verified threat states
+- Typography hierarchy and readable line lengths
+- Consistent spacing, border radii, elevation and card layouts
+- Clear button hierarchy and touch targets
+- Forms, search, filters, chips and expandable evidence
+- Accessible contrast in light and dark themes
+- Responsive phone, tablet and web layouts
+- Loading skeletons and empty states
+- Clear and calm warning styles that do not rely on color alone
+
+Do not use green as an unconditional "safe" indicator when a result is unknown. Do not make every screen visually busy.
+
+## Task 3 — LottieFiles integration
+
+Investigate the existing Flutter animation dependencies before adding anything.
+
+Use Lottie JSON animations for meaningful UI moments, such as:
+- Initial security onboarding
+- Scanning in progress
+- Successful completion of a scan
+- Shield/protection status
+- No threats found in the analyzed item
+- Threat detected, with a clear non-alarming presentation
+- Empty history and learning states
+- Offline or retry states where appropriate
+
+Source animations from LottieFiles or another legitimate source only after verifying the individual asset's license and commercial-use terms.
+
+Requirements:
+- Record the source URL, creator/attribution requirement and license for each external animation.
+- Store selected JSON assets locally in the project so the core interface does not depend on a remote animation URL.
+- Add assets to the Flutter asset manifest correctly.
+- Reuse existing animation dependencies when possible.
+- Keep files small and avoid loading large animations unnecessarily.
+- Provide static/icon fallbacks when animation loading fails or reduced motion is requested.
+- Respect reduced-motion preferences where available.
+- Do not copy premium or restricted animations without permission.
+- Do not use animations to imply that the device is protected against threats the app cannot actually detect or block.
+
+If a chosen asset cannot be downloaded or its license cannot be verified, use a simple original Flutter animation or existing icon instead.
+
+## Task 4 — Improve the dashboard
+
+Make the home screen clearly communicate:
+- Current protection configuration
+- Recent analysis activity
+- Important findings and advisories
+- Quick actions to scan a message, inspect a URL or investigate a number
+- Recent trends when sufficient data exists
+- Clear next steps
+
+Avoid presenting invented security scores or unsupported device health statistics. Every metric must have a defined calculation and source.
+
+## Task 5 — Improve analysis reports
+
+Make results visually clear:
+- Verdict and uncertainty
+- Risk score with an understandable scale
+- Evidence and matched indicators
+- Technical details and external source attribution
+- Safe next steps
+- Distinction between local heuristic analysis and verified reputation
+- Clear handling of unavailable or stale data
+
+Use accessible charts and visualizations only when they add information. Provide text equivalents.
+
+## Task 6 — Motion and interaction
+
+Add subtle, purposeful:
+- Screen transitions
+- Expand/collapse evidence panels
+- Button feedback
+- Scan progress states
+- Chart transitions
+- Animated risk indicators that settle on the final value
+
+Avoid flashing, unnecessary looping, exaggerated danger animations and motion that delays access to important information.
+
+Do not animate a score in a way that implies precision or confidence not supported by the underlying model.
+
+## Task 7 — Accessibility and performance
+
+- Verify text scaling and contrast.
+- Keep interactive elements keyboard-accessible on web.
+- Add semantic labels for controls and meaningful animation alternatives.
+- Avoid expensive blur, shadows and continuously running animations on low-memory devices.
+- Test large text, narrow widths, light/dark themes and reduced motion.
+- Preserve Sinhala and Tamil font and Unicode behavior.
+
+## Task 8 — Visual regression checks
+
+Run existing tests and add widget tests for important shared components and critical screens where practical. Take or update screenshots only if the current project supports a reproducible screenshot workflow.
+
+Do not report visual tests as passed if only unit tests ran.
+
+## Constraints
+
+No app redesign from scratch, no dependency upgrades without justification, no unlicensed animation assets, and no new external runtime dependency merely to display decorative effects.
+
+## Final report
+
+List each UI improvement, animation asset and license/source, files changed, dependencies, accessibility checks, performance concerns, test results and known gaps. Stop after Phase 7.
