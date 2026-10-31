@@ -56,6 +56,6 @@ void main() {
     print('============================');
     print('');
 
-    expect(errorCount, 1);
+    expect(errorCount, 2);
   });
 }

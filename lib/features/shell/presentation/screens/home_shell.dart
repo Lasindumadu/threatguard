@@ -10,6 +10,8 @@ import '../../../../core/services/clipboard_watch_service.dart';
 import '../../../../core/services/local_store.dart';
 import '../../../../core/services/shared_intake_service.dart';
 import '../../../../core/services/threat_engine.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/cyber_backdrop.dart';
 import '../../../dashboard/presentation/screens/dashboard_screen.dart';
 import '../../../insights/presentation/screens/model_insights_screen.dart';
 import '../../../intake/presentation/screens/quick_verdict_screen.dart';
@@ -347,7 +349,28 @@ class _HomeShellState extends State<HomeShell> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(titles[_index]),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: AppTheme.accent.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.accent.withValues(alpha: 0.35),
+                  width: 1,
+                ),
+              ),
+              child: const Icon(
+                Icons.shield_rounded,
+                size: 18,
+                color: AppTheme.accent,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(titles[_index]),
+          ],
+        ),
         actions: [
           if (_index == 1 && widget.controller.hasSmsPermission)
             IconButton(
@@ -359,65 +382,67 @@ class _HomeShellState extends State<HomeShell> {
             ),
         ],
       ),
-      body: IndexedStack(
-        index: _index,
-        children: [
-          ValueListenableBuilder(
-            valueListenable: widget.services.protectionMode,
-            builder: (context, _, child) => DashboardScreen(
-              messages: widget.controller.visibleMessages,
-              engine: widget.engine,
-              posture: _posture,
-              isScanning: widget.controller.isLoading,
-              statusMessage: widget.controller.errorMessage,
-              onScanRequested: widget.controller.hasSmsPermission
-                  ? widget.controller.loadMessages
-                  : widget.controller.requestPermission,
-              onOpenTools: () => setState(() => _index = 3),
-              onOpenMessage: _openMessage,
-            ),
-          ),
-          SmsInboxScreen(controller: widget.controller),
-          ShieldScreen(
-            mode: widget.services.protectionMode.value,
-            onModeChanged: (mode) => _setProtectionMode(mode),
-            reports: widget.services.threatEngine.analyzeAll(
-              widget.controller.visibleMessages,
-            ),
-            mutedSenders: widget.store?.mutedSenders ?? const {},
-            onUnmute: (sender) => widget.controller.unmuteSender(sender),
-            onOpenLinkScanner: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => LinkScannerScreen(
-                  safetyService: widget.services.linkSafetyService,
-                ),
+      body: CyberBackdrop(
+        child: IndexedStack(
+          index: _index,
+          children: [
+            ValueListenableBuilder(
+              valueListenable: widget.services.protectionMode,
+              builder: (context, _, child) => DashboardScreen(
+                messages: widget.controller.visibleMessages,
+                engine: widget.engine,
+                posture: _posture,
+                isScanning: widget.controller.isLoading,
+                statusMessage: widget.controller.errorMessage,
+                onScanRequested: widget.controller.hasSmsPermission
+                    ? widget.controller.loadMessages
+                    : widget.controller.requestPermission,
+                onOpenTools: () => setState(() => _index = 3),
+                onOpenMessage: _openMessage,
               ),
             ),
-            linkInterceptionEnabled:
-                widget.services.linkInterceptionEnabled.value,
-            onLinkInterceptionChanged: (value) => _setLinkInterception(value),
-            enabledChannels: widget.services.enabledChannels.value,
-            onEnabledChannelsChanged: (channels) => _setEnabledChannels(channels),
-            store: widget.store,
-            calibrator: widget.services.feedbackCalibrator,
-            alertService: widget.services.securityAlertService,
-          ),
-          ToolsScreen(
-            linkSafetyService: widget.services.linkSafetyService,
-            breachCheckService: widget.services.breachCheckService,
-            onOpenTips: _openTips,
-          ),
-          SettingsScreen(
-            store: widget.store,
-            engine: widget.engine,
-            themeMode: widget.themeMode,
-            onThemeModeChanged: widget.onThemeModeChanged,
-            onOpenInsights: _openInsights,
-            onOpenShield: () => setState(() => _index = 2),
-            onClipboardWatchChanged: _setClipboardWatch,
-            onOnlineLookupChanged: _setOnlineLookup,
-          ),
-        ],
+            SmsInboxScreen(controller: widget.controller),
+            ShieldScreen(
+              mode: widget.services.protectionMode.value,
+              onModeChanged: (mode) => _setProtectionMode(mode),
+              reports: widget.services.threatEngine.analyzeAll(
+                widget.controller.visibleMessages,
+              ),
+              mutedSenders: widget.store?.mutedSenders ?? const {},
+              onUnmute: (sender) => widget.controller.unmuteSender(sender),
+              onOpenLinkScanner: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => LinkScannerScreen(
+                    safetyService: widget.services.linkSafetyService,
+                  ),
+                ),
+              ),
+              linkInterceptionEnabled:
+                  widget.services.linkInterceptionEnabled.value,
+              onLinkInterceptionChanged: (value) => _setLinkInterception(value),
+              enabledChannels: widget.services.enabledChannels.value,
+              onEnabledChannelsChanged: (channels) => _setEnabledChannels(channels),
+              store: widget.store,
+              calibrator: widget.services.feedbackCalibrator,
+              alertService: widget.services.securityAlertService,
+            ),
+            ToolsScreen(
+              linkSafetyService: widget.services.linkSafetyService,
+              breachCheckService: widget.services.breachCheckService,
+              onOpenTips: _openTips,
+            ),
+            SettingsScreen(
+              store: widget.store,
+              engine: widget.engine,
+              themeMode: widget.themeMode,
+              onThemeModeChanged: widget.onThemeModeChanged,
+              onOpenInsights: _openInsights,
+              onOpenShield: () => setState(() => _index = 2),
+              onClipboardWatchChanged: _setClipboardWatch,
+              onOnlineLookupChanged: _setOnlineLookup,
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,

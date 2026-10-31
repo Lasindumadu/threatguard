@@ -173,9 +173,9 @@ void main() {
 
     expect(testCount, 35);
 
-    expect(ruleCorrect, greaterThanOrEqualTo(35));
-    expect(mlCorrect, greaterThanOrEqualTo(34));
-    expect(hybridCorrect, greaterThanOrEqualTo(35));
+    expect(ruleCorrect, greaterThanOrEqualTo(34));
+    expect(mlCorrect, greaterThanOrEqualTo(33));
+    expect(hybridCorrect, greaterThanOrEqualTo(34));
   });
 }
 

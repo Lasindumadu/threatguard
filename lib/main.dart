@@ -6,6 +6,7 @@ import 'core/services/local_store.dart';
 import 'core/services/threat_engine.dart';
 import 'core/theme/app_theme.dart';
 import 'features/shell/presentation/screens/home_shell.dart';
+import 'features/shell/presentation/widgets/cyber_splash_gate.dart';
 import 'features/sms/application/inbox_controller.dart';
 
 void main() {
@@ -92,13 +93,15 @@ class _ThreatGuardAppState extends State<ThreatGuardApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('en')],
-      home: HomeShell(
-        controller: _controller,
-        store: _store,
-        engine: ThreatEngine.instance,
-        services: _services,
-        themeMode: _themeMode,
-        onThemeModeChanged: _onThemeModeChanged,
+      home: CyberSplashGate(
+        child: HomeShell(
+          controller: _controller,
+          store: _store,
+          engine: ThreatEngine.instance,
+          services: _services,
+          themeMode: _themeMode,
+          onThemeModeChanged: _onThemeModeChanged,
+        ),
       ),
       builder: (context, child) {
         // Keep text scaling sane so large accessibility fonts do not break
