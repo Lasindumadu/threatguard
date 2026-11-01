@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/services.dart';
 
 import 'core/services/app_services.dart';
 import 'core/services/local_store.dart';
 import 'core/services/threat_engine.dart';
+import 'core/theme/app_skin.dart';
 import 'core/theme/app_theme.dart';
 import 'features/shell/presentation/screens/home_shell.dart';
-import 'features/shell/presentation/widgets/cyber_splash_gate.dart';
 import 'features/sms/application/inbox_controller.dart';
 
 void main() {
@@ -23,6 +24,7 @@ class ThreatGuardApp extends StatefulWidget {
 
 class _ThreatGuardAppState extends State<ThreatGuardApp> {
   ThemeMode _themeMode = ThemeMode.system;
+  AppSkin _skin = AppSkin.cyan;
 
   LocalStore? _store;
   late final InboxController _controller;
@@ -66,6 +68,7 @@ class _ThreatGuardAppState extends State<ThreatGuardApp> {
       setState(() {
         _store = store;
         _themeMode = _themeModeFrom(store.themeModeName);
+        _skin = AppSkin.fromId(store.skinId);
       });
     } catch (_) {
       // Persistence is a convenience, never a hard dependency. If the platform
@@ -84,8 +87,8 @@ class _ThreatGuardAppState extends State<ThreatGuardApp> {
     return MaterialApp(
       title: 'ThreatGuard',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: AppTheme.light(_skin),
+      darkTheme: AppTheme.dark(_skin),
       themeMode: _themeMode,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -93,15 +96,15 @@ class _ThreatGuardAppState extends State<ThreatGuardApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('en')],
-      home: CyberSplashGate(
-        child: HomeShell(
-          controller: _controller,
-          store: _store,
-          engine: ThreatEngine.instance,
-          services: _services,
-          themeMode: _themeMode,
-          onThemeModeChanged: _onThemeModeChanged,
-        ),
+      home: HomeShell(
+        controller: _controller,
+        store: _store,
+        engine: ThreatEngine.instance,
+        services: _services,
+        themeMode: _themeMode,
+        skin: _skin,
+        onThemeModeChanged: _onThemeModeChanged,
+        onSkinChanged: _onSkinChanged,
       ),
       builder: (context, child) {
         // Keep text scaling sane so large accessibility fonts do not break
@@ -109,11 +112,13 @@ class _ThreatGuardAppState extends State<ThreatGuardApp> {
         final scale = MediaQuery.textScalerOf(
           context,
         ).scale(1.0).clamp(1.0, 1.4);
-        return MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(textScaler: TextScaler.linear(scale)),
-          child: child!,
+        return _SystemUiSynchronizer(
+          child: MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: TextScaler.linear(scale)),
+            child: child!,
+          ),
         );
       },
     );
@@ -124,6 +129,11 @@ class _ThreatGuardAppState extends State<ThreatGuardApp> {
     _store?.setThemeMode(mode);
   }
 
+  void _onSkinChanged(AppSkin skin) {
+    setState(() => _skin = skin);
+    _store?.setSkinId(skin.id);
+  }
+
   /// The stored theme choice was never read back, so a user's dark-mode choice
   /// silently reverted to "system" on every cold start.
   static ThemeMode _themeModeFrom(String? raw) {
@@ -131,5 +141,37 @@ class _ThreatGuardAppState extends State<ThreatGuardApp> {
       (mode) => mode.name == raw,
       orElse: () => ThemeMode.system,
     );
+  }
+}
+
+/// Keeps the status bar and navigation bar "system chrome" in lockstep with the
+/// active brightness. Applied inside [MaterialApp.builder] so it rebuilds
+/// whenever the theme changes, and the overlay follows light/dark instantly.
+class _SystemUiSynchronizer extends StatelessWidget {
+  const _SystemUiSynchronizer({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        // iOS: `statusBarBrightness` means the background the icons sit on.
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        // Android: icon colour of the status bar.
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarColor: isDark
+            ? const Color(0xFF101822)
+            : const Color(0xFFF4F6F9),
+        systemNavigationBarIconBrightness: isDark
+            ? Brightness.light
+            : Brightness.dark,
+        // Keep our exact bar colours on Android 10+ instead of letting the
+        // system force a contrasting navigation bar.
+        systemNavigationBarContrastEnforced: false,
+      ),
+    );
+    return child;
   }
 }

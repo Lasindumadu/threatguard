@@ -369,4 +369,5 @@ int _levelRank(ThreatLevel level) => switch (level) {
   ThreatLevel.safe => 0,
   ThreatLevel.suspicious => 1,
   ThreatLevel.highRisk => 2,
+  ThreatLevel.critical => 3,
 };

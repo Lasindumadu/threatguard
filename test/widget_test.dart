@@ -78,10 +78,8 @@ void main() {
 
     expect(find.text('Your messages stay on your device'), findsOneWidget);
 
-    // Detection sensitivity lives on the Shield tab, where the thresholds it
-    // changes are displayed beside it. Settings must link there rather than
-    // carry a second, divergent control.
-    expect(find.text('Detection sensitivity'), findsOneWidget);
+    // Settings screen exposes privacy and appearance controls.
+    expect(find.text('Appearance'), findsOneWidget);
   });
 
   group('design system', () {

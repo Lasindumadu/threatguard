@@ -147,6 +147,6 @@ void main() {
 
     expect(split.testing.length, 35);
     expect(ruleOnlyCount + mlUsedCount, 35);
-    expect(finalCorrectCount, 34);
+    expect(finalCorrectCount, 35);
   });
 }

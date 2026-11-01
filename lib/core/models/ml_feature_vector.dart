@@ -41,6 +41,12 @@ class MlFeatureVector {
   final bool hasCredentialRequest;
   final bool hasStrongCredentialRequest;
 
+  /// Account verification language combined with a URL — the phishing shape:
+  /// the reader is asked to verify an account by following a link. Social
+  /// engineering typically pairs authority with secrecy instead of a link, so
+  /// this helps the model separate phishing from social engineering.
+  final bool hasAccountVerificationUrlPattern;
+
   // Derived interaction features.
   final bool hasPrizeFinancialCombination;
   final bool hasAccountCredentialCombination;
@@ -74,6 +80,7 @@ class MlFeatureVector {
     required this.hasIdentityVerification,
     required this.hasCredentialRequest,
     required this.hasStrongCredentialRequest,
+    required this.hasAccountVerificationUrlPattern,
     required this.hasPrizeFinancialCombination,
     required this.hasAccountCredentialCombination,
     required this.hasAuthorityCredentialCombination,

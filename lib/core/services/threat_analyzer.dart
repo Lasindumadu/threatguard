@@ -610,7 +610,6 @@ class ThreatAnalyzer {
     // suspicious on purpose; it has the vocabulary but not the mechanism.
     if (context.hasImperativePasswordRequest &&
         (context.hasCredentialRequestContext ||
-            context.hasStrongCredentialRequest ||
             context.hasIdentityVerificationLanguage)) {
       return ThreatLevel.highRisk;
     }
@@ -723,7 +722,8 @@ class ThreatAnalyzer {
     //    someone on a job or an interview is not a prize at all.
     if (context.hasPrizePattern &&
         !context.hasFinancialRequest &&
-        !context.hasCredentialRequest) {
+        !context.hasCredentialRequest &&
+        !context.hasUrl) {
       return isApplicationOutcome(text)
           ? ThreatType.legitimate
           : ThreatType.spam;

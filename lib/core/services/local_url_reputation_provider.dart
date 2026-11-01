@@ -61,7 +61,25 @@ class LocalUrlReputationProvider extends UrlReputationProvider {
   }
 
   bool _isIpAddress(String host) {
-    return RegExp(r'^(?:\d{1,3}\.){3}\d{1,3}$').hasMatch(host);
+    final parts = host.split('.');
+
+    if (parts.length != 4) {
+      return false;
+    }
+
+    for (final part in parts) {
+      if (part.isEmpty) {
+        return false;
+      }
+
+      final value = int.tryParse(part);
+
+      if (value == null || value < 0 || value > 255) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   bool _isShortener(String host) {

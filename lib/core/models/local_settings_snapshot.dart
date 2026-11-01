@@ -15,6 +15,7 @@ class LocalSettingsSnapshot {
   final String? protectionMode;
   final List<String>? enabledChannels;
   final String? themeMode;
+  final String? skinId;
 
   /// `null` means "not stored" — the caller decides the default. This is
   /// deliberately not `false`, because "the user has never chosen" and "the
@@ -22,14 +23,17 @@ class LocalSettingsSnapshot {
   final bool? clipboardWatch;
   final bool? linkInterception;
   final bool? onlineLookup;
+  final bool? reduceMotion;
 
   const LocalSettingsSnapshot({
     this.protectionMode,
     this.enabledChannels,
     this.themeMode,
+    this.skinId,
     this.clipboardWatch,
     this.linkInterception,
     this.onlineLookup,
+    this.reduceMotion,
   });
 
   ProtectionMode get mode => ProtectionMode.values.firstWhere(
@@ -54,9 +58,11 @@ class LocalSettingsSnapshot {
     'protectionMode': protectionMode,
     'enabledChannels': enabledChannels,
     'themeMode': themeMode,
+    'skinId': skinId,
     'clipboardWatch': clipboardWatch,
     'linkInterception': linkInterception,
     'onlineLookup': onlineLookup,
+    'reduceMotion': reduceMotion,
   };
 
   /// Tolerant parse: a malformed or partially-written value must not take the
@@ -70,9 +76,11 @@ class LocalSettingsSnapshot {
           ?.whereType<String>()
           .toList(growable: false),
       themeMode: json['themeMode'] as String?,
+      skinId: json['skinId'] as String?,
       clipboardWatch: asBool(json['clipboardWatch']),
       linkInterception: asBool(json['linkInterception']),
       onlineLookup: asBool(json['onlineLookup']),
+      reduceMotion: asBool(json['reduceMotion']),
     );
   }
 }

@@ -57,7 +57,10 @@ class AppServices {
   ///
   /// Also live state: the Clipboard channel toggle and this switch both gate
   /// the same watcher, and they must read one value rather than two copies.
-  final ValueNotifier<bool> clipboardWatchEnabled = ValueNotifier(false);
+  final ValueNotifier<bool> clipboardWatchEnabled;
+
+  /// Whether the user has reduced motion enabled for accessibility.
+  final ValueNotifier<bool> reduceMotionEnabled;
 
   AppServices._({
     required this.threatEngine,
@@ -70,6 +73,8 @@ class AppServices {
     required this.linkInterceptionEnabled,
     required this.enabledChannels,
     required this.onlineLookupEnabled,
+    required this.clipboardWatchEnabled,
+    required this.reduceMotionEnabled,
   }) {
     // Changing a channel toggle takes effect immediately: the engine clears its
     // cache when the value actually changes.
@@ -77,6 +82,9 @@ class AppServices {
     protectionMode.addListener(_syncProtectionMode);
     _syncEnabledChannels();
     _syncProtectionMode();
+    // Sync reduce motion setting when it changes
+    reduceMotionEnabled.addListener(_syncReduceMotion);
+    _syncReduceMotion();
   }
 
   void _syncEnabledChannels() {
@@ -85,6 +93,11 @@ class AppServices {
 
   void _syncProtectionMode() {
     threatEngine.setMode(protectionMode.value);
+  }
+
+  void _syncReduceMotion() {
+    // Propagate to all screens via the store or services
+    // The store will pick up the value and widgets can read it
   }
 
   /// Applies settings loaded from disk without a widget rebuild round-trip.
@@ -97,12 +110,14 @@ class AppServices {
     required Set<MessageSource> channels,
     bool? onlineLookup,
     bool? clipboardWatch,
+    bool? reduceMotion,
   }) {
     protectionMode.value = mode;
     linkInterceptionEnabled.value = linkInterception;
     enabledChannels.value = Set.unmodifiable(channels);
     if (onlineLookup != null) onlineLookupEnabled.value = onlineLookup;
     if (clipboardWatch != null) clipboardWatchEnabled.value = clipboardWatch;
+    if (reduceMotion != null) reduceMotionEnabled.value = reduceMotion;
   }
 
   void setOnlineLookupEnabled(bool enabled) {
@@ -188,6 +203,8 @@ class AppServices {
       linkInterceptionEnabled: ValueNotifier(true),
       enabledChannels: channelNotifier,
       onlineLookupEnabled: onlineNotifier,
+      clipboardWatchEnabled: ValueNotifier(false),
+      reduceMotionEnabled: ValueNotifier(false),
     );
   }
 
@@ -199,6 +216,7 @@ class AppServices {
     enabledChannels.dispose();
     onlineLookupEnabled.dispose();
     clipboardWatchEnabled.dispose();
+    reduceMotionEnabled.dispose();
     threatEngine.dispose();
   }
 }

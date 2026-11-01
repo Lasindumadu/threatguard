@@ -186,6 +186,7 @@ class ThreatRuleCatalog {
         'tax department',
         'customs',
         'delivery company',
+        'delivery service',
         'support team',
         'customer support',
         'customer service',

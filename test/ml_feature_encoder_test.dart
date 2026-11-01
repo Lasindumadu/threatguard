@@ -7,11 +7,11 @@ void main() {
     const dataset = MlTrainingDataset();
     const encoder = MlFeatureEncoder();
 
-    test('encodes a feature vector into 27 numeric values', () {
+    test('encodes a feature vector into 29 numeric values', () {
       final example = dataset.build().first;
       final encoded = encoder.encode(example.features);
 
-      expect(encoded.length, 28);
+      expect(encoded.length, 29);
 
       for (final value in encoded) {
         expect(value, isA<double>());

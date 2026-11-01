@@ -1,7 +1,7 @@
 import 'protection_mode.dart';
 import 'threat_signal.dart';
 
-enum ThreatLevel { safe, suspicious, highRisk }
+enum ThreatLevel { safe, suspicious, highRisk, critical }
 
 enum ThreatType { legitimate, spam, phishing, scam, socialEngineering }
 

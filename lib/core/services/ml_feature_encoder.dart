@@ -32,6 +32,7 @@ class MlFeatureEncoder {
       _bool(features.hasIdentityVerification),
       _bool(features.hasCredentialRequest),
       _bool(features.hasStrongCredentialRequest),
+      _bool(features.hasAccountVerificationUrlPattern),
       _bool(features.hasPrizeFinancialCombination),
       _bool(features.hasAccountCredentialCombination),
       _bool(features.hasAuthorityCredentialCombination),

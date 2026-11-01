@@ -86,10 +86,16 @@ class HybridThreatAnalyzer {
       );
     }
 
+    final benignReason = VerdictPolicy.benignContext(
+      message,
+      SignalFeatures.extract(message),
+    );
+
     final decision = _resolveFinalType(
       ruleAnalysis: ruleAnalysis,
       ml: mlPrediction,
       mode: mode,
+      benignReason: benignReason,
     );
 
     final mlType = _toThreatType(mlPrediction.type);
@@ -100,11 +106,6 @@ class HybridThreatAnalyzer {
     );
 
     final channel = ChannelProfile.of(source);
-
-    final benignReason = VerdictPolicy.benignContext(
-      message,
-      SignalFeatures.extract(message),
-    );
 
     return VerdictPolicy.assemble(
       ruleAnalysis: ruleAnalysis,
@@ -153,6 +154,7 @@ class HybridThreatAnalyzer {
     required ThreatAnalysis ruleAnalysis,
     required MlPrediction ml,
     required ProtectionMode mode,
+    String? benignReason,
   }) {
     final ruleType = ruleAnalysis.type;
     final mlType = _toThreatType(ml.type);
@@ -185,6 +187,22 @@ class HybridThreatAnalyzer {
     // Rules found nothing: accept the ML only when sufficiently confident
     // *and* decisive about which class it is.
     if (ruleType == ThreatType.legitimate) {
+      // When the rule engine has already identified a strong benign reason
+      // (security advice, transaction notification, delivery update, etc.),
+      // the model must not override it. The rule engine's context analysis is
+      // a deliberate, explainable determination that the message is safe;
+      // an ML probability is an inference about wording, not a determination
+      // of intent.
+      if (benignReason != null) {
+        return _Verdict(
+          ThreatType.legitimate,
+          VerdictSource.none,
+          'The rule engine found no threat after applying benign context '
+              '($benignReason), and the model was not permitted to override '
+              'that determination.',
+        );
+      }
+
       if (ml.confidence >= mlOverride && decisive) {
         return _Verdict(
           mlType,

@@ -11,6 +11,7 @@ class ThreatTrend {
   final int highRisk;
   final int suspicious;
   final int safe;
+  final int critical;
 
   /// Category -> count, for the distribution chart.
   final Map<ThreatType, int> byType;
@@ -30,13 +31,14 @@ class ThreatTrend {
     required this.highRisk,
     required this.suspicious,
     required this.safe,
+    required this.critical,
     required this.byType,
     required this.topThreatSenders,
     required this.threatsByDay,
     this.totalRiskScore = 0,
   });
 
-  int get threatCount => highRisk + suspicious;
+  int get threatCount => highRisk + suspicious + critical;
 
   double get threatRatio => total == 0 ? 0.0 : threatCount / total;
 
@@ -45,8 +47,8 @@ class ThreatTrend {
   int get riskIndex {
     if (total == 0) return 0;
 
-    final weighted = (highRisk * 2) + suspicious;
-    final ceiling = total * 2;
+    final weighted = (highRisk * 2) + suspicious + critical * 3;
+    final ceiling = total * 3;
 
     return ((weighted / ceiling) * 100).round().clamp(0, 100);
   }
@@ -61,6 +63,7 @@ class ThreatTrend {
     var highRisk = 0;
     var suspicious = 0;
     var safe = 0;
+    var criticalCount = 0;
 
     final byType = <ThreatType, int>{
       for (final type in ThreatType.values) type: 0,
@@ -72,14 +75,14 @@ class ThreatTrend {
     for (final report in reports) {
       final analysis = report.analysis;
       final level = analysis.finalLevel;
-
-      switch (level) {
-        case ThreatLevel.highRisk:
-          highRisk++;
-        case ThreatLevel.suspicious:
-          suspicious++;
-        case ThreatLevel.safe:
-          safe++;
+      if (level == ThreatLevel.highRisk) {
+        highRisk++;
+      } else if (level == ThreatLevel.suspicious) {
+        suspicious++;
+      } else if (level == ThreatLevel.safe) {
+        safe++;
+      } else if (level == ThreatLevel.critical) {
+        criticalCount++;
       }
 
       byType[analysis.finalType] = (byType[analysis.finalType] ?? 0) + 1;
@@ -107,6 +110,7 @@ class ThreatTrend {
       highRisk: highRisk,
       suspicious: suspicious,
       safe: safe,
+      critical: criticalCount,
       byType: byType,
       topThreatSenders: Map.fromEntries(sortedSenders.take(5)),
       threatsByDay: Map.fromEntries(

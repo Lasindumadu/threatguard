@@ -24,13 +24,16 @@ class StaggeredEntrance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool reduceMotion = AppTheme.reduceMotionOf(context);
+    final Duration effectiveDelay = reduceMotion ? Duration.zero : delay;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (var i = 0; i < children.length; i++)
           _StaggerItem(
             index: i,
-            delay: delay,
+            delay: effectiveDelay,
             offset: offset,
             child: children[i],
           ),
@@ -86,17 +89,18 @@ class _StaggerItemState extends State<_StaggerItem>
 
   @override
   Widget build(BuildContext context) {
-    final curved = CurvedAnimation(
-      parent: _controller,
-      curve: AppTheme.motionCurve,
-    );
+    final bool reduceMotion = AppTheme.reduceMotionOf(context);
+
+    if (reduceMotion) {
+      return widget.child;
+    }
 
     return AnimatedBuilder(
-      animation: curved,
+      animation: _controller,
       builder: (context, child) => Opacity(
-        opacity: curved.value,
+        opacity: _controller.value,
         child: Transform.translate(
-          offset: Offset(0, widget.offset * (1 - curved.value)),
+          offset: Offset(0, widget.offset * (1 - _controller.value)),
           child: child,
         ),
       ),
@@ -198,6 +202,11 @@ class CountUpText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool reduceMotion = AppTheme.reduceMotionOf(context);
+
+    if (reduceMotion) {
+      return Text(value.toString() + (suffix ?? ''), style: style);
+    }
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: value.toDouble()),
       duration: duration,
@@ -233,7 +242,20 @@ class AnimatedRingGauge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final trackColor = Theme.of(context).dividerColor;
+    final bool reduceMotion = AppTheme.reduceMotionOf(context);
+    final Duration motionDuration = AppTheme.getMotionDuration(context);
+
+    if (reduceMotion) {
+      // Static display without animation
+      return _StaticRingGauge(
+        score: score,
+        color: color,
+        size: size,
+        centerLabel: centerLabel,
+        centerSubLabel: centerSubLabel,
+        centerIcon: centerIcon,
+      );
+    }
 
     return Semantics(
       label: '$centerLabel, score $score out of 100',
@@ -242,14 +264,14 @@ class AnimatedRingGauge extends StatelessWidget {
         height: size,
         child: TweenAnimationBuilder<double>(
           tween: Tween(begin: 0, end: score / 100),
-          duration: const Duration(milliseconds: 900),
+          duration: motionDuration,
           curve: Curves.easeOutCubic,
           builder: (context, value, _) {
             return CustomPaint(
               painter: _RingPainter(
                 progress: value,
                 color: color,
-                trackColor: trackColor,
+                trackColor: Theme.of(context).dividerColor,
               ),
               child: Center(
                 child: Column(
@@ -281,6 +303,66 @@ class AnimatedRingGauge extends StatelessWidget {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _StaticRingGauge extends StatelessWidget {
+  final int score;
+  final Color color;
+  final double size;
+  final String? centerLabel;
+  final String? centerSubLabel;
+  final IconData? centerIcon;
+
+  const _StaticRingGauge({
+    required this.score,
+    required this.color,
+    required this.size,
+    this.centerLabel,
+    this.centerSubLabel,
+    this.centerIcon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = score / 100;
+
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _RingPainter(
+        progress: progress,
+        color: color,
+        trackColor: Theme.of(context).dividerColor,
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (centerIcon != null)
+              Icon(centerIcon, size: size * 0.18, color: color),
+            Text(
+              centerLabel ?? '$score',
+              style: TextStyle(
+                fontSize: size * 0.28,
+                fontWeight: FontWeight.w800,
+                color: color,
+                height: 1.0,
+                letterSpacing: -1,
+              ),
+            ),
+            if (centerSubLabel != null)
+              Text(
+                centerSubLabel!,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -354,6 +436,11 @@ class AnimatedBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool reduceMotion = AppTheme.reduceMotionOf(context);
+
+    if (reduceMotion) {
+      return _StaticBar(value: value, color: color, height: height);
+    }
     return ClipRRect(
       borderRadius: BorderRadius.circular(height / 2),
       child: TweenAnimationBuilder<double>(
@@ -382,6 +469,44 @@ class AnimatedBar extends StatelessWidget {
   }
 }
 
+class _StaticBar extends StatelessWidget {
+  final double value;
+  final Color color;
+  final double height;
+
+  const _StaticBar({
+    required this.value,
+    required this.color,
+    required this.height,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(height / 2),
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: Theme.of(context).dividerColor,
+          borderRadius: BorderRadius.circular(height / 2),
+        ),
+        child: FractionallySizedBox(
+          widthFactor: value.clamp(0.0, 1.0),
+          child: Container(
+            height: height,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [color.withValues(alpha: 0.75), color],
+              ),
+              borderRadius: BorderRadius.circular(height / 2),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// A pulse that draws attention without animating forever.
 ///
 /// Three beats and it stops: an infinitely pulsing element becomes wallpaper
@@ -390,12 +515,14 @@ class AttentionPulse extends StatefulWidget {
   final Widget child;
   final Color color;
   final bool enabled;
+  final bool reduceMotion;
 
   const AttentionPulse({
     super.key,
     required this.child,
     required this.color,
     this.enabled = true,
+    this.reduceMotion = false,
   });
 
   @override
@@ -409,12 +536,12 @@ class _AttentionPulseState extends State<AttentionPulse>
   @override
   void initState() {
     super.initState();
+    final bool rm = AppTheme.reduceMotionOf(context);
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1100),
     );
-
-    if (widget.enabled) {
+    if (!rm) {
       _controller.forward().then((_) {
         if (!mounted) return;
         _controller.repeat(reverse: true, count: 3);
@@ -430,7 +557,9 @@ class _AttentionPulseState extends State<AttentionPulse>
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.enabled) return widget.child;
+    final bool reduceMotion = AppTheme.reduceMotionOf(context);
+
+    if (!widget.enabled || reduceMotion) return widget.child;
 
     return AnimatedBuilder(
       animation: _controller,
@@ -463,21 +592,52 @@ class DistributionBar extends StatelessWidget {
   final Map<String, ({int count, Color color})> segments;
   final double height;
 
-  const DistributionBar({super.key, required this.segments, this.height = 14});
+  const DistributionBar({
+    super.key,
+    required this.segments,
+    this.height = 14,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final bool reduceMotion = AppTheme.reduceMotionOf(context);
+
+    if (reduceMotion) {
+      final visible = segments.entries.where((e) => e.value.count > 0).toList();
+      final total = visible.fold<int>(0, (sum, e) => sum + e.value.count);
+
+      if (total == 0) {
+        return Container(
+          height: height,
+          decoration: BoxDecoration(
+            color: Theme.of(context).dividerColor,
+            borderRadius: BorderRadius.circular(height / 2),
+          ),
+        );
+      }
+
+      return Row(
+        children: [
+          for (final entry in visible)
+            Expanded(
+              flex: entry.value.count,
+              child: Container(
+                margin: const EdgeInsets.only(right: 1.5),
+                decoration: BoxDecoration(
+                  color: entry.value.color.withValues(alpha: 0.55),
+                  borderRadius: BorderRadius.circular(height / 2),
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+
     final visible = segments.entries.where((e) => e.value.count > 0).toList();
     final total = visible.fold<int>(0, (sum, e) => sum + e.value.count);
 
     if (total == 0) {
-      return Container(
-        height: height,
-        decoration: BoxDecoration(
-          color: Theme.of(context).dividerColor,
-          borderRadius: BorderRadius.circular(height / 2),
-        ),
-      );
+      return const SizedBox.shrink();
     }
 
     return Semantics(

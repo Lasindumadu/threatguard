@@ -87,7 +87,9 @@ class LocalStore {
   static const _kClipboardWatch = 'clipboard_watch_enabled';
   static const _kEnabledChannels = 'enabled_channels';
   static const _kThemeMode = 'theme_mode';
+  static const _kAppSkin = 'app_skin';
   static const _kOnboarded = 'onboarding_complete';
+  static const _kReduceMotion = 'reduce_motion_enabled';
 
   static LocalStore? _instance;
 
@@ -123,9 +125,11 @@ class LocalStore {
     protectionMode: _prefs.getString(_kProtectionMode),
     enabledChannels: _prefs.getStringList(_kEnabledChannels),
     themeMode: _prefs.getString(_kThemeMode),
+    skinId: _prefs.getString(_kAppSkin),
     clipboardWatch: _prefs.getBool(_kClipboardWatch),
     linkInterception: _prefs.getBool(_kLinkInterception),
     onlineLookup: _prefs.getBool(_kOnlineLookup),
+    reduceMotion: _prefs.getBool(_kReduceMotion),
   );
 
   Future<void> setStrictModeEnabled(bool value) =>
@@ -216,10 +220,18 @@ class LocalStore {
   Future<void> setThemeMode(ThemeMode mode) =>
       _prefs.setString(_kThemeMode, mode.name);
 
+  String get skinId => _prefs.getString(_kAppSkin) ?? 'cyan';
+
+  Future<void> setSkinId(String id) => _prefs.setString(_kAppSkin, id);
+
   bool get onboardingComplete => _prefs.getBool(_kOnboarded) ?? false;
 
-  Future<void> setOnboardingComplete(bool value) =>
-      _prefs.setBool(_kOnboarded, value);
+  /// Whether the user has reduced motion enabled for accessibility.
+  bool get reduceMotionEnabled =>
+      _prefs.getBool(_kReduceMotion) ?? false;
+
+  Future<void> setReduceMotionEnabled(bool value) =>
+      _prefs.setBool(_kReduceMotion, value);
 
   // ---------------------------------------------------------------- muted
 

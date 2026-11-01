@@ -59,6 +59,7 @@ void main() {
       'hasIdentityVerification',
       'hasCredentialRequest',
       'hasStrongCredentialRequest',
+      'hasAccountVerificationUrlPattern',
       'hasPrizeFinancialCombination',
       'hasAccountCredentialCombination',
       'hasAuthorityCredentialCombination',
@@ -196,6 +197,8 @@ bool _getBooleanFeature(MlFeatureVector features, String featureName) {
       return features.hasCredentialRequest;
     case 'hasStrongCredentialRequest':
       return features.hasStrongCredentialRequest;
+    case 'hasAccountVerificationUrlPattern':
+      return features.hasAccountVerificationUrlPattern;
     case 'hasPrizeFinancialCombination':
       return features.hasPrizeFinancialCombination;
     case 'hasAccountCredentialCombination':

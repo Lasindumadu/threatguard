@@ -149,6 +149,7 @@ class DashboardScreen extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
+                                fontFeatures: AppTheme.tabularNumbers,
                                 color: AppTheme.highRiskColor,
                               ),
                             ),
@@ -297,6 +298,7 @@ class _StatTile extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
+                fontFeatures: AppTheme.tabularNumbers,
                 color: color,
               ),
             ),

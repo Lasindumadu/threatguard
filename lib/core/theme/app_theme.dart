@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 
-import '../../core/models/threat_analysis.dart';
+import '../models/threat_analysis.dart';
+import '../services/local_store.dart';
+import 'app_skin.dart';
 
 /// ThreatGuard's design language.
 ///
@@ -51,8 +53,7 @@ class AppTheme {
   static const gapLg = 24.0;
   static const gapXl = 32.0;
 
-  /// One tempo for the whole product: every transition moves at the same
-  /// speed, which is what makes an app feel coherent rather than assembled.
+  /// Motion tempos.
   static const motionFast = Duration(milliseconds: 180);
   static const motionBase = Duration(milliseconds: 320);
   static const motionSlow = Duration(milliseconds: 620);
@@ -70,48 +71,92 @@ class AppTheme {
   static const darkBorder = Color(0xFF25313D);
   static const darkMuted = Color(0xFF93A2B3);
 
-  static ThemeData light() => _base(Brightness.light);
-  static ThemeData dark() => _base(Brightness.dark);
+  /// Light mode: subtle gradient background for depth.
+  static const lightGradientStart = Color(0xFFEFF6FF);
+  static const lightGradientEnd = Color(0xFFFAFAFF);
+
+  /// Dark mode: subtle gradient for depth.
+  static const darkGradientStart = Color(0xFF0E141B);
+  static const darkGradientEnd = Color(0xFF101822);
+
+  static ThemeData light([AppSkin? skin]) => _base(Brightness.light, skin);
+
+  // NOTE: This file now consumes AppDesign tokens for a cohesive design system.
+  static ThemeData dark([AppSkin? skin]) => _base(Brightness.dark, skin);
 
   /// True in dark mode, for the places that need a different gradient rather
   /// than just a different colour.
   static bool isDark(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;
 
-  static ThemeData _base(Brightness brightness) {
+  /// Whether the user has reduced motion enabled for accessibility.
+  /// This reads the setting from the app's persistent storage.
+  /// The actual value is read from the [LocalStore] or [AppServices]
+  /// depending on the widget context - see each widget's implementation.
+  static bool reduceMotionOf(BuildContext context) => _reduceMotionFromStore(context);
+
+  static bool _reduceMotionFromStore(BuildContext context) {
+    // Try to read from the local store if available
+    try {
+      final store = LocalStore.maybeInstance;
+      if (store != null) {
+        return store.reduceMotionEnabled;
+      }
+    } catch (_) {
+      // Store not available yet, use default
+    }
+    // Default: reduced motion off
+    return false;
+  }
+
+  /// Returns the effective motion duration based on user preference.
+  static Duration getMotionDuration(BuildContext context) {
+    if (reduceMotionOf(context)) {
+      return Duration.zero;
+    }
+    return motionBase;
+  }
+
+  static ThemeData _base(Brightness brightness, [AppSkin? skin]) {
     final isLight = brightness == Brightness.light;
+    final activeSkin = skin ?? AppSkin.cyan;
+    final primaryColor = isLight ? seed : activeSkin.primary;
+    final surfaceColor = isLight ? lightSurface : activeSkin.surface;
+    final cardColor = isLight ? lightCard : activeSkin.card;
+    final elevatedColor = isLight ? const Color(0xFFE9EDF3) : activeSkin.elevated;
+    final borderColor = isLight ? lightBorder : activeSkin.border;
 
     // Hand-built scheme rather than fromSeed: fromSeed would replace the brand
     // ramp with its own tonal palette and flatten primary against accent.
     final scheme = ColorScheme(
       brightness: brightness,
-      primary: isLight ? seed : accent,
+      primary: primaryColor,
       onPrimary: isLight ? Colors.white : const Color(0xFF00212B),
       primaryContainer: isLight
           ? const Color(0xFFCDE7EF)
-          : const Color(0xFF0F3948),
+          : activeSkin.primary.withValues(alpha: 0.25),
       onPrimaryContainer: isLight
           ? const Color(0xFF062430)
-          : const Color(0xFFB8E4F0),
-      secondary: accent,
+          : activeSkin.glow,
+      secondary: primaryColor,
       onSecondary: const Color(0xFF00212B),
       secondaryContainer: isLight
           ? const Color(0xFFC7F0F8)
-          : const Color(0xFF0B3B48),
+          : activeSkin.elevated,
       onSecondaryContainer: isLight
           ? const Color(0xFF002F3B)
-          : const Color(0xFFB0E7F2),
+          : Colors.white,
       tertiary: const Color(0xFF7C5CFF),
       onTertiary: Colors.white,
       error: highRiskColor,
       onError: Colors.white,
-      surface: isLight ? lightSurface : darkSurface,
+      surface: surfaceColor,
       onSurface: isLight ? const Color(0xFF121820) : const Color(0xFFE8EEF4),
       onSurfaceVariant: isLight ? lightMuted : darkMuted,
-      outline: isLight ? lightBorder : darkBorder,
+      outline: borderColor,
       outlineVariant: isLight
           ? const Color(0xFFEDF0F4)
-          : const Color(0xFF1E2832),
+          : borderColor.withValues(alpha: 0.6),
       shadow: Colors.black,
       scrim: Colors.black54,
       inverseSurface: isLight
@@ -120,19 +165,19 @@ class AppTheme {
       onInverseSurface: isLight
           ? const Color(0xFFE8EEF4)
           : const Color(0xFF1B2630),
-      inversePrimary: accent,
-      surfaceContainerHighest: isLight ? const Color(0xFFE9EDF3) : darkElevated,
+      inversePrimary: primaryColor,
+      surfaceContainerHighest: elevatedColor,
     );
 
-    final border = isLight ? lightBorder : darkBorder;
+    final border = borderColor;
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: isLight ? lightSurface : darkSurface,
 
-      // Slightly tightened tracking on headings and a generous body line
-      // height: the difference between "Flutter default" and designed.
+      // Slightly tightened tracking on headings and a generous body line height
+      // the difference between "Flutter default" and designed.
       textTheme: _textTheme(scheme),
 
       appBarTheme: AppBarTheme(
@@ -151,9 +196,9 @@ class AppTheme {
       ),
 
       cardTheme: CardThemeData(
-        elevation: 0,
-        margin: EdgeInsets.zero,
-        color: isLight ? lightCard : darkCard,
+        elevation: isLight ? 0.5 : 1.5,
+        margin: const EdgeInsets.all(8),
+        color: cardColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusMd),
           side: BorderSide(color: border),
@@ -259,7 +304,14 @@ class AppTheme {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       ),
 
-      dividerTheme: DividerThemeData(color: border, space: 1, thickness: 1),
+      dividerTheme: DividerThemeData(
+        // Soft hairline from the theme's border colour: half-pixel thickness
+        // renders as a crisp 1-physical-px line, and the 2px logical gap gives
+        // rows a little breathing room without reading as a gap.
+        color: border,
+        space: 2,
+        thickness: 0.5,
+      ),
 
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
@@ -398,13 +450,20 @@ class AppTheme {
     );
   }
 
+  /// Digit-stable rendering for counts, percentages and risk scores: columns
+  /// of numbers stop jittering while values tick or animate.
+  static const List<FontFeature> tabularNumbers = [
+    FontFeature.tabularFigures(),
+  ];
+
   /// Monospace for anything the user must read letter-by-letter.
   static TextStyle mono(BuildContext context, {double size = 13}) {
     return TextStyle(
-      fontFamily: 'monospace',
+      fontFamily: 'Inter',
       fontSize: size,
       fontWeight: FontWeight.w700,
       letterSpacing: -0.2,
+      fontFeatures: tabularNumbers,
       color: Theme.of(context).colorScheme.onSurface,
     );
   }
@@ -419,31 +478,29 @@ class AppTheme {
     );
   }
 
-  // ------------------------------------------------------------- mappings
+  /// A soft tint of a risk colour, for chip and banner backgrounds.
+  static Color tint(Color color, {double alpha = 0.12}) =>
+      color.withValues(alpha: alpha);
 
   static Color levelColor(ThreatLevel level) => switch (level) {
     ThreatLevel.safe => safeColor,
     ThreatLevel.suspicious => suspiciousColor,
     ThreatLevel.highRisk => highRiskColor,
+    ThreatLevel.critical => criticalColor,
   };
 
   static String levelLabel(ThreatLevel level) => switch (level) {
     ThreatLevel.safe => 'Low risk',
     ThreatLevel.suspicious => 'Suspicious',
     ThreatLevel.highRisk => 'High risk',
-  };
-
-  /// One-word verdicts, for the banner headline.
-  static String levelWord(ThreatLevel level) => switch (level) {
-    ThreatLevel.safe => 'Safe',
-    ThreatLevel.suspicious => 'Careful',
-    ThreatLevel.highRisk => 'Danger',
+    ThreatLevel.critical => 'Critical',
   };
 
   static IconData levelIcon(ThreatLevel level) => switch (level) {
     ThreatLevel.safe => Icons.verified_rounded,
     ThreatLevel.suspicious => Icons.warning_rounded,
     ThreatLevel.highRisk => Icons.dangerous_rounded,
+    ThreatLevel.critical => Icons.error_outlined,
   };
 
   static IconData typeIcon(ThreatType type) => switch (type) {
@@ -477,10 +534,6 @@ class AppTheme {
     ThreatType.scam => 'Scam',
     ThreatType.socialEngineering => 'Social eng.',
   };
-
-  /// A soft tint of a risk colour, for chip and banner backgrounds.
-  static Color tint(Color color, {double alpha = 0.12}) =>
-      color.withValues(alpha: alpha);
 }
 
 /// Fade + slight scale for pushed routes.

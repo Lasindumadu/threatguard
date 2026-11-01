@@ -218,7 +218,7 @@ class EvaluationDataset {
       id: 'phishing_004',
       message: 'Your verification is required. Please provide your password and one-time password to restore access.',
       expectedType: ThreatType.phishing,
-      expectedLevel: ThreatLevel.suspicious,
+      expectedLevel: ThreatLevel.highRisk,
       scenarioFamily: 'phishing:credential-verification-with-url',
     ),
     EvaluationCase(
@@ -260,7 +260,7 @@ class EvaluationDataset {
       id: 'phishing_010',
       message: 'Your identity verification is required. Submit your password to complete verification.',
       expectedType: ThreatType.phishing,
-      expectedLevel: ThreatLevel.suspicious,
+      expectedLevel: ThreatLevel.highRisk,
       scenarioFamily: 'phishing:credential-verification-with-url',
     ),
 

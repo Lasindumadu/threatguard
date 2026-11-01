@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/services/local_store.dart';
 import '../../../../core/services/threat_engine.dart';
+import '../../../../core/theme/app_skin.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/threat_widgets.dart';
 
@@ -12,9 +13,9 @@ class SettingsScreen extends StatefulWidget {
   final ThreatEngine engine;
   final ThemeMode themeMode;
   final ValueChanged<ThemeMode> onThemeModeChanged;
+  final AppSkin skin;
+  final ValueChanged<AppSkin> onSkinChanged;
   final VoidCallback onOpenInsights;
-
-  /// Switches to the Shield tab, where detection sensitivity is configured.
   final VoidCallback onOpenShield;
 
   /// Called when clipboard watch is toggled.
@@ -23,16 +24,22 @@ class SettingsScreen extends StatefulWidget {
   /// Called when online lookup is toggled.
   final ValueChanged<bool>? onOnlineLookupChanged;
 
+  /// Called when reduce-motion toggle is changed.
+  final ValueChanged<bool>? onReduceMotionChanged;
+
   const SettingsScreen({
     super.key,
     required this.store,
     required this.engine,
     required this.themeMode,
     required this.onThemeModeChanged,
+    required this.skin,
+    required this.onSkinChanged,
     required this.onOpenInsights,
     required this.onOpenShield,
     this.onClipboardWatchChanged,
     this.onOnlineLookupChanged,
+    this.onReduceMotionChanged,
   });
 
   @override
@@ -80,12 +87,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   }
                 },
               ),
+               const SizedBox(height: 8),
+               Text(
+                 'Both themes use the same risk colours, so a red flag means the '
+                 'same thing whichever you choose.',
+                 style: TextStyle(
+                   fontSize: 12.5,
+                   height: 1.4,
+                   color: Theme.of(context).colorScheme.onSurfaceVariant,
+                 ),
+               ),
+               const SizedBox(height: 16),
+               const Text(
+                 'Neon Theme Preset',
+                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+               ),
+               const SizedBox(height: 8),
+               Wrap(
+                 spacing: 8,
+                 runSpacing: 8,
+                 children: AppSkin.values.map((skin) {
+                   final isSelected = widget.skin == skin;
+                   return ChoiceChip(
+                     label: Row(
+                       mainAxisSize: MainAxisSize.min,
+                       children: [
+                         Container(
+                           width: 12,
+                           height: 12,
+                           decoration: BoxDecoration(
+                             color: skin.primary,
+                             shape: BoxShape.circle,
+                             boxShadow: [
+                               BoxShadow(
+                                 color: skin.glow.withValues(alpha: 0.6),
+                                 blurRadius: 6,
+                               ),
+                             ],
+                           ),
+                         ),
+                         const SizedBox(width: 6),
+                         Text(skin.name),
+                       ],
+                     ),
+                     selected: isSelected,
+                     onSelected: (selected) {
+                       if (selected) {
+                         widget.onSkinChanged(skin);
+                       }
+                     },
+                   );
+                 }).toList(),
+               ),
+               const SizedBox(height: 8),
+              // Reduce motion toggle
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Reduce animations'),
+                value: widget.onReduceMotionChanged != null &&
+                    (store?.reduceMotionEnabled ?? false),
+                onChanged: widget.onReduceMotionChanged != null
+                    ? (value) {
+                        widget.onReduceMotionChanged!.call(value);
+                        setState(() {});
+                      }
+                    : null,
+                subtitle: const Text(
+                  'Reduce movement and animation for accessibility',
+                ),
+              ),
               const SizedBox(height: 8),
               Text(
-                'Both themes use the same risk colours, so a red flag means the '
-                'same thing whichever you choose.',
+                'When enabled, the app will use instant transitions instead of '
+                'animated ones.',
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: 12,
                   height: 1.4,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -162,47 +238,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _feedbackCard(context, store),
         const SizedBox(height: 14),
         SectionCard(
-          title: 'How detection works',
-          icon: Icons.school_outlined,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _bullet(
-                context,
-                'Rule engine',
-                'Looks for known manipulation patterns: urgency, account '
-                    'threats, requests for credentials or payment, secrecy and '
-                    'authority pressure.',
-              ),
-              _bullet(
-                context,
-                'Statistical model',
-                'A logistic-regression classifier trained on labelled examples '
-                    'assigns a probability to each threat category.',
-              ),
-              _bullet(
-                context,
-                'Link inspection',
-                'Checks URLs for IP-address hosts, punycode lookalikes, '
-                    'link shorteners and domain/organisation mismatches.',
-              ),
-              _bullet(
-                context,
-                'Arbitration',
-                'The two engines are reconciled explicitly. When they disagree '
-                    'the app tells you which one decided and why.',
-              ),
-              _bullet(
-                context,
-                'Campaign detection',
-                'Messages are fingerprinted so variants of the same mass '
-                    'campaign are recognised as a group.',
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        SectionCard(
           title: 'About',
           icon: Icons.info_outline,
           child: Column(
@@ -216,6 +251,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Text(
                 'On-device SMS and message threat classification. No account, '
                 'no analytics, no cloud.',
+                style: TextStyle(
+                  height: 1.45,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Version 1.0.0+1',
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.4,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Built with Flutter Framework',
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.4,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'No account, no analytics, no cloud.',
                 style: TextStyle(
                   height: 1.45,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -374,30 +435,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _bullet(BuildContext context, String title, String body) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            body,
-            style: TextStyle(
-              fontSize: 12.5,
-              height: 1.45,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _kv(String key, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 5),
@@ -406,7 +443,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Expanded(child: Text(key, style: const TextStyle(fontSize: 13.5))),
           Text(
             value,
-            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
+            style: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w800,
+              fontFeatures: AppTheme.tabularNumbers,
+            ),
           ),
         ],
       ),

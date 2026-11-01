@@ -102,6 +102,9 @@ class MlFeatureExtractor {
     final hasUrgencyCredentialCombination =
         features.hasUrgency && hasCredentialRequest;
 
+    final hasAccountVerificationUrlPattern =
+        features.hasAccountVerificationLanguage && hasUrl;
+
     return MlFeatureVector(
       caseId: caseId,
       scenarioFamily: scenarioFamily,
@@ -130,6 +133,7 @@ class MlFeatureExtractor {
       hasIdentityVerification: features.hasIdentityVerificationLanguage,
       hasCredentialRequest: hasCredentialRequest,
       hasStrongCredentialRequest: features.hasStrongCredentialRequest,
+      hasAccountVerificationUrlPattern: hasAccountVerificationUrlPattern,
       hasPrizeFinancialCombination: hasPrizeFinancialCombination,
       hasAccountCredentialCombination: hasAccountCredentialCombination,
       hasAuthorityCredentialCombination: hasAuthorityCredentialCombination,

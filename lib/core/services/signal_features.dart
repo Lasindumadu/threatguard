@@ -182,6 +182,7 @@ class SignalFeatures {
       'provide your password',
       'enter your password',
       'submit your password',
+     'submit your credentials',
     ]);
   }
 

@@ -206,6 +206,7 @@ class HybridThreatAnalysis {
       ThreatLevel.highRisk => 0.90,
       ThreatLevel.suspicious => 0.70,
       ThreatLevel.safe => 0.60,
+      ThreatLevel.critical => 0.95,
     };
 
     if (source == VerdictSource.none) return ruleCertainty * 0.8;

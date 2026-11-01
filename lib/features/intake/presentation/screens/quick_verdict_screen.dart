@@ -317,6 +317,7 @@ class VerdictBanner extends StatelessWidget {
             ThreatLevel.safe => 'Looks safe',
             ThreatLevel.suspicious => 'Be careful',
             ThreatLevel.highRisk => 'Dangerous',
+            ThreatLevel.critical => 'Critical',
           };
 
     final displayColor = notAnalysed

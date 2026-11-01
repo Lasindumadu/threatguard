@@ -20,6 +20,7 @@ MlTrainingExample _example({
       urlCount: 0,
       hasUrgency: false,
       hasAccountSecurity: false,
+      hasAccountVerificationUrlPattern: false,
       hasCredential: false,
       hasFinancial: false,
       hasPrizeReward: false,
